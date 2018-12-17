@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.ooduberu.chatapp.R;
+import com.example.ooduberu.chatapp.utility.AppPreference;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private static final String TAG = SplashScreenActivity.class.getSimpleName();
@@ -22,15 +23,22 @@ public class SplashScreenActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-//AppPreference.isFirstTimeLaunch()
-                if (true) {
+                if (AppPreference.isFirstTimeLaunch()) {
                     startActivity(new Intent(SplashScreenActivity.this, WelcomeActivity.class));
                 } else {
-                    //startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                    startActivity(new Intent(SplashScreenActivity.this, LoginActivity.class));
                 }
                 finish();
             }
         }, SPLASH_TIME_OUT);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //This resolves the memory leak by removing the handler references.
+        handler.removeCallbacksAndMessages(null);
 
     }
 }

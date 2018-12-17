@@ -1,5 +1,6 @@
 package com.example.ooduberu.chatapp.activities;
 
+import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,11 +20,24 @@ import android.view.WindowManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.ooduberu.chatapp.R;
+import com.example.ooduberu.chatapp.utility.AppPreference;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class WelcomeActivity extends AppCompatActivity {
-    private ViewPager viewPager;
+    Unbinder unbinder;
+
+    @BindView(R.id.view_pager) ViewPager viewPager;
+    @BindView(R.id.dots) TabLayout dots;
+    @BindView(R.id.btn_skip) MaterialButton btnSkip;
+    @BindView(R.id.btn_next) MaterialButton btnNext;
+    @BindView(R.id.back) MaterialButton  btnBack;
+
     private int totalSteps = 4;
-    private MaterialButton btnSkip, btnNext, btnBack;
+
 
 
     @Override
@@ -37,54 +51,44 @@ public class WelcomeActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_welcome);
 
-        btnBack = findViewById(R.id.back);
-        viewPager = findViewById(R.id.view_pager);
-        TabLayout dots = findViewById(R.id.dots);
-        btnSkip = findViewById(R.id.btn_skip);
-        btnNext = findViewById(R.id.btn_next);
-
+        unbinder = ButterKnife.bind(this);
 
         dots.setupWithViewPager(viewPager, true);
-        Pager adapter = new Pager(getSupportFragmentManager(),4);
+        Pager adapter = new Pager(getSupportFragmentManager(),totalSteps);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
         viewPager.setOffscreenPageLimit(0);
 
-        btnSkip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchHomeScreen();
-            }
-        });
+    }
 
-        btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int nextPage = viewPager.getCurrentItem() + 1;
-                if (nextPage < totalSteps) {
-                    viewPager.setCurrentItem(nextPage, true);
-                } else {
-                    launchHomeScreen();
-                }
-            }
-        });
+    @OnClick(R.id.btn_skip)
+    public void skipOnBoarding(){
+        launchHomeScreen();
+    }
 
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int lastPage = viewPager.getCurrentItem() - 1;
-                if(lastPage > -1){
-                    viewPager.setCurrentItem(lastPage, true);
-                }
-            }
-        });
+    @OnClick(R.id.btn_next)
+    public void nextPage(){
+        int nextPage = viewPager.getCurrentItem() + 1;
+        if (nextPage < totalSteps) {
+            viewPager.setCurrentItem(nextPage, true);
+        } else {
+            launchHomeScreen();
+        }
+    }
 
-
+    @OnClick(R.id.back)
+    public void previousPage(){
+        int lastPage = viewPager.getCurrentItem() - 1;
+        if(lastPage > -1){
+            viewPager.setCurrentItem(lastPage, true);
+        }
     }
 
 
     private void launchHomeScreen(){
-
+        AppPreference.setIsFirstTimeLaunch(false);
+        startActivity(new Intent(WelcomeActivity.this, LoginActivity.class));
+        finish();
     }
 
 
@@ -268,4 +272,9 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbinder.unbind();
+    }
 }
