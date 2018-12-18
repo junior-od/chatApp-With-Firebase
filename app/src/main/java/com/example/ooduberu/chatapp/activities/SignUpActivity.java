@@ -10,6 +10,8 @@ import android.util.Patterns;
 
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.model.User;
+import com.example.ooduberu.chatapp.utility.AppPreference;
+import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.example.ooduberu.chatapp.utility.ValidationUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,6 +73,7 @@ public class SignUpActivity extends BaseActivity {
 
     @OnClick(R.id.log_in)
     public void logInPage(){
+        DeviceUtils.hideKeyboard(this);
         startActivity(new Intent(getBaseContext(),LoginActivity.class));
         finish();
     }
@@ -78,6 +81,7 @@ public class SignUpActivity extends BaseActivity {
 
     @OnClick(R.id.button_login)
     public void signUp(){
+        DeviceUtils.hideKeyboard(this);
         if(!NetworkUtils.isNetworkAvailable(this)){
             Toasty.warning(getBaseContext(),"no internet connection").show();
             return;
@@ -171,6 +175,7 @@ public class SignUpActivity extends BaseActivity {
         mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
+                hideProgressLoader();
                 if(task.isSuccessful()){
                     User user_information = new User();
                     user_information.setFirst_name(first_name);
@@ -184,19 +189,18 @@ public class SignUpActivity extends BaseActivity {
 
                     getCurrentUser = FirebaseAuth.getInstance().getCurrentUser();//gets the current user
                     uId = getCurrentUser.getUid();
+                    AppPreference.setCurrentUserId(uId);
                     database_ref = database.getReference().child("Users").child(uId);
                     database_ref.setValue(user_information);//pushes the object date of user information in the User data table in the database
 
-
                     usernameExists = false;
                     Toasty.success(getBaseContext(),"sign up was sucessful").show();
-                    hideProgressLoader();
                     startActivity(new Intent(getBaseContext(),HomeActivity.class));
                     finish();
 
                 }else {
                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
-                    hideProgressLoader();
+
                 }
             }
         });

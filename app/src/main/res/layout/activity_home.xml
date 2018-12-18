@@ -1,10 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     tools:context=".activities.HomeActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include
+            android:id="@+id/app_navigate"
+            layout="@layout/app_nav"></include>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabbed_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:animationCache="true"
+            android:animateLayoutChanges="true"
+            android:background="@color/colorPrimary"
+            app:tabTextColor="#fff"
+            app:tabSelectedTextColor="#c3c0d2"
+            app:tabIndicatorColor="#fff"
+            >
+
+
+
+        </android.support.design.widget.TabLayout>
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+
+    </android.support.v4.view.ViewPager>
 
     <android.support.design.button.MaterialButton
         android:id="@+id/sign_out"
@@ -12,4 +45,4 @@
         android:layout_height="wrap_content"
         android:text="sign out"/>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

@@ -23,14 +23,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
-
-import org.w3c.dom.Text;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
-import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 import es.dmoral.toasty.Toasty;
 
@@ -105,6 +100,7 @@ public class LoginActivity extends BaseActivity {
 
     @OnClick(R.id.button_login)
     public void loginToApp(){
+        DeviceUtils.hideKeyboard(this);
         if(!NetworkUtils.isNetworkAvailable(this)){
             Toasty.warning(getBaseContext(),"no internet connection").show();
             return;
@@ -124,6 +120,7 @@ public class LoginActivity extends BaseActivity {
         mAuth.signInWithEmailAndPassword(userEmail,userPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
+                hideProgressLoader();
                 if(task.isSuccessful()){
                     getDeviceToken = FirebaseInstanceId.getInstance().getToken();
                     AppPreference.setCurrentUserId(mAuth.getCurrentUser().getUid());
@@ -134,7 +131,6 @@ public class LoginActivity extends BaseActivity {
                     users_table.setValue(getDeviceToken).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            hideProgressLoader();
                             if(task.isSuccessful()){
                                 startActivity(new Intent(getBaseContext(),HomeActivity.class));
                                 finish();
@@ -144,11 +140,15 @@ public class LoginActivity extends BaseActivity {
                         }
                     });
                 }else{
-                    hideProgressLoader();
                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                 }
             }
         });
+    }
+
+    @OnClick(R.id.delete_password_input)
+    public void clearPasswordField(){
+
     }
 
 

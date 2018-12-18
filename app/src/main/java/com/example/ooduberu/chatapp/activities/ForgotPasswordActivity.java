@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Patterns;
 
 import com.example.ooduberu.chatapp.R;
+import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -41,6 +42,7 @@ public class ForgotPasswordActivity extends BaseActivity {
 
     @OnClick(R.id.button_resend_password)
     public void resendPasswordToEmail(){
+        DeviceUtils.hideKeyboard(this);
         if(!NetworkUtils.isNetworkAvailable(this)){
             Toasty.warning(getBaseContext(),"no internet connection").show();
             return;
@@ -89,6 +91,7 @@ public class ForgotPasswordActivity extends BaseActivity {
 
     @OnClick(R.id.back_to_login)
     public void backToLogin(){
+        DeviceUtils.hideKeyboard(this);
         startActivity(new Intent(getBaseContext(),LoginActivity.class));
         finish();
     }
