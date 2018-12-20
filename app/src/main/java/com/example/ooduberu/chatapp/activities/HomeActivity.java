@@ -31,7 +31,6 @@ public class HomeActivity extends BaseActivity {
         setSupportActionBar(mToolbar);//sets the action bar for the activity
         getSupportActionBar().setTitle("chat-app");
 
-
         mAuth = FirebaseAuth.getInstance();
 
         Toasty.success(getBaseContext(), AppPreference.getCurrentUserId()).show();
@@ -52,7 +51,7 @@ public class HomeActivity extends BaseActivity {
                 break;
 
             case R.id.settings_link:
-                Toasty.error(getBaseContext(),"settings").show();
+                startActivity(new Intent(getBaseContext(),SettingsActivity.class));
                 break;
 
             case R.id.log_out_link:

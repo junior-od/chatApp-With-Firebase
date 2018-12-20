@@ -38,9 +38,11 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.FindFriendActivity"
-            android:screenOrientation="portrait"
             android:parentActivityName=".activities.HomeActivity"
-            />
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.SettingsActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".activities.HomeActivity"></activity>
     </application>
 
 </manifest>
