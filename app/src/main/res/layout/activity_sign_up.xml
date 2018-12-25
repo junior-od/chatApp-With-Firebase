@@ -237,14 +237,6 @@
                     app:layout_constraintTop_toTopOf="@+id/textView6" />
             </android.support.constraint.ConstraintLayout>
 
-
-
-
-
-
         </LinearLayout>
-
-
-
     </LinearLayout>
 </ScrollView>
