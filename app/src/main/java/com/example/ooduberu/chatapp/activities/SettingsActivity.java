@@ -40,6 +40,7 @@ public class SettingsActivity extends BaseActivity {
     String uId;
     String profileImage;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +60,7 @@ public class SettingsActivity extends BaseActivity {
         userTable.child(uId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                user_name.setText(dataSnapshot.child("user_name").getValue().toString());
+                user_name.setText("@"+dataSnapshot.child("user_name").getValue().toString());
                 user_status.setText(dataSnapshot.child("status").getValue().toString());
 
                 //to display the profile image from firebase

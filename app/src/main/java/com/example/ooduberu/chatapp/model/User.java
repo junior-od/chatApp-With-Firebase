@@ -1,13 +1,13 @@
 package com.example.ooduberu.chatapp.model;
 
 public class User {
-    String first_name,last_name,user_name,email,image,chat_background_image,status,device_token,header_image;
+    String first_name,last_name,user_name,email,image,chat_background_image,status,device_token,header_image,account_type;
 
     public User(){
 
     }
 
-    public User(String first_name, String last_name, String user_name, String email, String image, String chat_background_image, String status, String device_token,String header_image) {
+    public User(String first_name, String last_name, String user_name, String email, String image, String chat_background_image, String status, String device_token,String header_image,String account_type) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.user_name = user_name;
@@ -17,6 +17,7 @@ public class User {
         this.status = status;
         this.device_token = device_token;
         this.header_image = header_image;
+        this.account_type = account_type;
     }
 
     public String getFirst_name() {
@@ -89,5 +90,13 @@ public class User {
 
     public void setHeader_image(String header_image) {
         this.header_image = header_image;
+    }
+
+    public String getAccount_type() {
+        return account_type;
+    }
+
+    public void setAccount_type(String account_type) {
+        this.account_type = account_type;
     }
 }

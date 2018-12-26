@@ -24,7 +24,7 @@
         <ImageView
             android:id="@+id/user_header_image"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="120dp"
             android:scaleType="fitXY"
             android:src="@drawable/default_header_background" />
 
@@ -35,7 +35,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="70dp"
             android:src="@drawable/person_placeholder"
             android:transitionName="profile"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -44,95 +44,129 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/user_header_image" />
 
-        <android.support.design.button.MaterialButton
+        <Button
             android:id="@+id/follow_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#54d9c8"
+            android:background="#54d9c8"
             android:text="FOLLOW"
             android:textColor="@color/white"
+            android:drawableStart="@drawable/ic_add"
+            android:drawablePadding="5dp"
             app:layout_constraintBottom_toBottomOf="@+id/user_profile_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.9"
             app:layout_constraintStart_toEndOf="@+id/user_profile_image"
             app:layout_constraintTop_toTopOf="@+id/user_profile_image"
             app:layout_constraintVertical_bias="1.0" />
+
     </android.support.constraint.ConstraintLayout>
 
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+        <TextView
+            android:id="@+id/full_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text=""
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/darkGrey"
+            />
+
+        <TextView
+            android:id="@+id/user_status"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text=""
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="3"
         android:orientation="horizontal">
+
         <LinearLayout
-            android:layout_weight="1"
-            android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
             <TextView
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="posts"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/black"
-                />
+                android:text="posts"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/posts_figure"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="0"
-                android:layout_gravity="center"
-                android:textColor="@color/black"
-                />
+                android:textColor="@color/black" />
         </LinearLayout>
+
         <LinearLayout
-            android:layout_weight="1"
-            android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
             <TextView
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="followers"
-                android:textColor="@color/black"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                />
+                android:text="followers"
+                android:textColor="@color/black" />
+
             <TextView
                 android:id="@+id/followers_figure"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="0"
-                android:layout_gravity="center"
-                android:textColor="@color/black"
-                />
+                android:textColor="@color/black" />
         </LinearLayout>
+
         <LinearLayout
-            android:layout_weight="1"
-            android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
             <TextView
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="following"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/black"
-                />
+                android:text="following"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/following_figure"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="0"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/black"
-                />
+                android:text="0"
+                android:textColor="@color/black" />
         </LinearLayout>
     </LinearLayout>
 

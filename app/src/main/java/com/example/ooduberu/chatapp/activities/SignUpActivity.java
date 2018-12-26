@@ -187,6 +187,7 @@ public class SignUpActivity extends BaseActivity {
                     user_information.setImage("default");
                     user_information.setChat_background_image("default");
                     user_information.setHeader_image("default");
+                    user_information.setAccount_type("unlocked");
 
                     getCurrentUser = FirebaseAuth.getInstance().getCurrentUser();//gets the current user
                     uId = getCurrentUser.getUid();
