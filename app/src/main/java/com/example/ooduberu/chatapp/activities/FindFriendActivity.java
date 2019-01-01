@@ -33,6 +33,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.model.User;
 import com.example.ooduberu.chatapp.utility.AppPreference;
+import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -153,7 +154,6 @@ public class FindFriendActivity extends BaseActivity {
                 holder.userView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                             viewUserProfile(getRef(position).getKey(),holder.user_image);
 //                        if(getRef(position).getKey().toString().equals(uId)){
 //
@@ -199,6 +199,7 @@ public class FindFriendActivity extends BaseActivity {
     }
 
     private void viewUserProfile(String userId,ImageView sharedImageView){
+        DeviceUtils.hideKeyboard(this);
         if(userId.equals(uId)){
             Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
             ActivityOptionsCompat options = ActivityOptionsCompat.
@@ -269,8 +270,6 @@ public class FindFriendActivity extends BaseActivity {
 
         //sets the image of the user
         public void setImage(String image, Context context){//takes in the findFriendsActivity context  with string name
-
-
             if (image.equals("default")){
                 user_image.setImageResource(R.drawable.person_placeholder);
             }

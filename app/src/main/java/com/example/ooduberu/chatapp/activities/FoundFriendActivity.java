@@ -4,13 +4,16 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,6 +26,7 @@ import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,9 +42,11 @@ import es.dmoral.toasty.Toasty;
 
 public class FoundFriendActivity extends BaseActivity {
     Unbinder unbinder;
+    DatabaseReference rootDatabaseHolder;
     DatabaseReference userTable;
     DatabaseReference followersTable;
     DatabaseReference followingTable;
+    DataSnapshot ds;
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
     @BindView(R.id.user_header_image) ImageView user_header_image;
@@ -49,9 +55,9 @@ public class FoundFriendActivity extends BaseActivity {
     @BindView(R.id.user_name) TextView user_name;
     @BindView(R.id.user_status) TextView user_status;
     @BindView(R.id.posts_figure) TextView posts_figure;
-    @BindView(R.id.followers_figure) TextView followers_figure;
-    @BindView(R.id.following_figure) TextView following_figure;
-    @BindView(R.id.follow_button) Button follow_button;
+    TextView followers_figure;
+    TextView following_figure;
+    Button follow_button;
 
     String uId;
     String otherUsersId;
@@ -88,9 +94,22 @@ public class FoundFriendActivity extends BaseActivity {
         setSupportActionBar(mToolbar);//sets the action bar for the activity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        followers_figure = (TextView)findViewById(R.id.followers_figure);
+        following_figure = (TextView)findViewById(R.id.following_figure);
+        follow_button = (Button)findViewById(R.id.follow_button);
 
         uId = AppPreference.getCurrentUserId();
         otherUsersId = getIntent().getExtras().getString("otherUsersId");
+
+
+        follow_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                followOrUnfollow();
+            }
+        });
+
+        rootDatabaseHolder = FirebaseDatabase.getInstance().getReference();
 
         userTable = FirebaseDatabase.getInstance().getReference().child("Users");
         userTable.keepSynced(true);
@@ -134,14 +153,101 @@ public class FoundFriendActivity extends BaseActivity {
             }
         });
 
+
         followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
         followersTable.keepSynced(true);
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        followingTable.keepSynced(true);
 
+        //new  code testing
+        rootDatabaseHolder.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                fetchFollowers();
+                fetchFollowing();
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //Toasty.success(getBaseContext(),"changed").show();
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                //Toasty.success(getBaseContext(),"removed").show();
+                if(dataSnapshot.hasChild("followers")){
+
+                }else{
+                    followers_figure.setText("0");
+                }
+
+                if(dataSnapshot.hasChild("following")){
+
+                }else{
+                    following_figure.setText("0");
+                }
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                 Toasty.success(getBaseContext(),"moved").show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toasty.success(getBaseContext(),"cancelled").show();
+            }
+        });
+
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                supportFinishAfterTransition();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void fetchFollowers(){
         followersTable.child(otherUsersId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.child("accepted").exists()){
-                    followers_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+                    followersTable.child(otherUsersId).child("accepted").addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                            followers_figure.setText(dataSnapshot.getChildrenCount()+"");
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                            followers_figure.setText(dataSnapshot.getChildrenCount()+"");
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
                     if(dataSnapshot.child("accepted").child(uId).exists()){
                         if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
                             follow_button.setText("following");
@@ -153,6 +259,9 @@ public class FoundFriendActivity extends BaseActivity {
                             }
                         }
                     }
+
+                }else{
+                    followers_figure.setText("0");
                 }
 
                 if(dataSnapshot.child("pending").exists()){
@@ -177,15 +286,27 @@ public class FoundFriendActivity extends BaseActivity {
 
             }
         });
+    }
 
-        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
-        followingTable.keepSynced(true);
-
+    private void fetchFollowing(){
         followingTable.child(otherUsersId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    following_figure.setText(dataSnapshot.getChildrenCount()+"");
+                    if (dataSnapshot.child("accepted").exists())
+                    following_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+                }
+
+                if(dataSnapshot.child("pending").child(uId).exists()){
+                    if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("follow back")){
+                        follow_button.setText("follow back");
+                        follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                        follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                       // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            follow_button.setCompoundDrawableTintList(myList);
+                        }
+                    }
                 }
 
             }
@@ -195,22 +316,9 @@ public class FoundFriendActivity extends BaseActivity {
 
             }
         });
-
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                supportFinishAfterTransition();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @OnClick(R.id.follow_button)
-    public void followOrUnfollow(){
+    private void followOrUnfollow(){
         if(!NetworkUtils.isNetworkAvailable(this)){
             Toasty.warning(getBaseContext(),"no internet connection").show();
             return;
@@ -221,7 +329,10 @@ public class FoundFriendActivity extends BaseActivity {
 
         }else if (follow_button.getText().toString().trim().equalsIgnoreCase("request sent")){
             cancelRequest();
-        }else{
+        }else if( follow_button.getText().toString().trim().equalsIgnoreCase("follow back")){
+            followBack();
+        }
+        else{
             unfollow();
         }
 
@@ -235,13 +346,96 @@ public class FoundFriendActivity extends BaseActivity {
             followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    hideProgressLoader();
                     if(task.isSuccessful()){
-                        followingTable.child(uId).child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        followingTable.child(uId).child("accepted").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    FollowBody fb = new FollowBody();
+                                    fb.setRequest_type("follow back");
+                                    followingTable.child(uId).child("pending").child(otherUsersId).setValue(fb).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            hideProgressLoader();
+                                            if (task.isSuccessful()){
+                                                fetchFollowers();
+                                                follow_button.setText("following");
+                                                Toasty.success(getBaseContext(),"now following").show();
+                                            }else{
+                                                Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                            }
+                                        }
+                                    });
+                                }else{
+                                    Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                }
+                            }
+                        });
+                                } else{
+                                    Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                }
+                            }
+                        });
+
+
+        }else{
+            final FollowBody followBody = new FollowBody();
+            followBody.setRequest_type("pending");
+            followersTable.child(otherUsersId).child("pending").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        followingTable.child(uId).child("pending").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                hideProgressLoader();
+                                if(task.isSuccessful()){
+                                    Toasty.success(getBaseContext(),"request sent").show();
+                                }
+                                else{
+                                    Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                }
+                            }
+                        });
+
+                    }else{
+                        hideProgressLoader();
+                        Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                    }
+                }
+            });
+        }
+
+
+    }
+
+    private void followBack(){
+        showProgressLoader();
+        if(accountType.equalsIgnoreCase("unlocked")){
+            final FollowBody followBody = new FollowBody();
+            followBody.setRequest_type("accepted");
+            followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+                        followingTable.child(uId).child("accepted").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()){
+                                    follow_button.setText("following");
                                     Toasty.success(getBaseContext(),"now following").show();
+                                    followingTable.child(otherUsersId).child("pending").child(uId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            hideProgressLoader();
+                                            if(task.isSuccessful()){
+                                                fetchFollowers();
+
+                                            }else{
+                                                Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                            }
+                                        }
+                                    });
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                 }
@@ -258,15 +452,28 @@ public class FoundFriendActivity extends BaseActivity {
             followersTable.child(otherUsersId).child("pending").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    hideProgressLoader();
                     if (task.isSuccessful()){
-                        Toasty.success(getBaseContext(),"request sent").show();
+                        followingTable.child(uId).child("pending").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                hideProgressLoader();
+                                if(task.isSuccessful()){
+                                    Toasty.success(getBaseContext(),"request sent").show();
+                                }
+                                else{
+                                    Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                }
+                            }
+                        });
+
                     }else{
+                        hideProgressLoader();
                         Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                     }
                 }
             });
         }
+
 
     }
 
@@ -277,6 +484,8 @@ public class FoundFriendActivity extends BaseActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 hideProgressLoader();
                 if (task.isSuccessful()){
+                    fetchFollowers();
+                    fetchFollowing();
                     follow_button.setText("follow");
                     follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add,0,0,0);
                     Toasty.success(getBaseContext(),"request cancelled").show();
@@ -294,9 +503,21 @@ public class FoundFriendActivity extends BaseActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 hideProgressLoader();
                 if(task.isSuccessful()){
-                    follow_button.setText("follow");
-                    follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add,0,0,0);
-                    Toasty.success(getBaseContext(),"unfollowed").show();
+                    followingTable.child(uId).child("accepted").child(otherUsersId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                fetchFollowers();
+                                fetchFollowing();
+                                follow_button.setText("follow");
+                                follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add,0,0,0);
+                                Toasty.success(getBaseContext(),"unfollowed").show();
+                            }else{
+                                Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                            }
+                        }
+                    });
+
                 }else{
                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                 }
