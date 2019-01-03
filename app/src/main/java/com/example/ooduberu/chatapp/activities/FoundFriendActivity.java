@@ -631,13 +631,23 @@ public class FoundFriendActivity extends BaseActivity {
                         }
                     });
 
-                }else{
+                }
+                else{
+                    followingTable.child(uId).child("pending").child(otherUsersId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                follow_button_text = "";
+                                fetchFollowers();
+                                fetchFollowing();
+                                setDefaultButtonText();
+                                Toasty.success(getBaseContext(),"unfollowed").show();
+                            }else{
+                                Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                            }
+                        }
+                    });
 
-                    follow_button_text = "";
-                    fetchFollowers();
-                    fetchFollowing();
-                    setDefaultButtonText();
-                    Toasty.success(getBaseContext(),"unfollowed").show();
                 }
             }
 
