@@ -220,6 +220,7 @@ public class FoundFriendActivity extends BaseActivity {
     private void setDefaultButtonText(){
         if(follow_button_text.isEmpty()){
             follow_button.setText("follow");
+            follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add, 0, 0, 0);
             follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
         }
     }
@@ -305,6 +306,7 @@ public class FoundFriendActivity extends BaseActivity {
                         follow_button.setText(follow_button_text);
                         follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
                         follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                        follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add, 0, 0, 0);
                         // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             follow_button.setCompoundDrawableTintList(myList);

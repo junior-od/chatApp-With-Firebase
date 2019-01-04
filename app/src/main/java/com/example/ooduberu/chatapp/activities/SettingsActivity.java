@@ -30,11 +30,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class SettingsActivity extends BaseActivity {
     Unbinder unbinder;
     DatabaseReference userTable;
+    CircleImageView user_profile_image;
+    TextView user_name;
+    TextView user_status;
 
     @BindView(R.id.my_profile_layout) ConstraintLayout my_profile_layout;
-    @BindView(R.id.user_profile_image) CircleImageView user_profile_image;
-    @BindView(R.id.user_name) TextView user_name;
-    @BindView(R.id.user_status) TextView user_status;
     @BindView(R.id.app_navigate) Toolbar mToolbar;
 
     String uId;
@@ -51,6 +51,10 @@ public class SettingsActivity extends BaseActivity {
         setSupportActionBar(mToolbar);//sets the action bar for the activity
         getSupportActionBar().setTitle("Settings");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        user_profile_image = (CircleImageView)findViewById(R.id.user_profile_image);
+        user_name = (TextView)findViewById(R.id.user_name);
+        user_status = (TextView)findViewById(R.id.user_status);
 
 
         uId = AppPreference.getCurrentUserId();
@@ -89,6 +93,12 @@ public class SettingsActivity extends BaseActivity {
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, (View)user_profile_image, "profile");
         startActivity(intent, options.toBundle());
+
+    }
+
+    @OnClick(R.id.account_settings)
+    public void goToAccountSettings(){
+        startActivity(new Intent(getBaseContext(),AccountSettingsActivity.class));
 
     }
 

@@ -6,4 +6,5 @@
     <string name="find_friends">find friends</string>
     <string name="settings">settings</string>
     <string name="log_out">log out</string>
+    <string name="when_your_account_is_private_only_people_you_approve_will_see_your_feeds_your_existing_followers_won_t_be_affected">When your account is private, only people you approve will see your feeds. Your existing followers won\'t be affected</string>
 </resources>

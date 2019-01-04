@@ -183,7 +183,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/account_settings"
+        android:id="@+id/help_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -222,7 +222,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:text="Account"
+                android:text="Help"
                 android:textColor="@color/black" />
 
             <View
