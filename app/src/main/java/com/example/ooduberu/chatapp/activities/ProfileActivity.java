@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -36,6 +37,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +63,9 @@ import es.dmoral.toasty.Toasty;
 public class ProfileActivity extends BaseActivity {
     Unbinder unbinder;
     DatabaseReference userTable;
+    DatabaseReference rootDatabaseHolder;
+    DatabaseReference followersTable;
+    DatabaseReference followingTable;
     StorageReference profileImagesStorage;
     File photoFile = null;
     Uri image_uri;
@@ -72,8 +77,8 @@ public class ProfileActivity extends BaseActivity {
     @BindView(R.id.user_header_image) ImageView user_header_image;
     @BindView(R.id.user_profile_image) ImageView user_profile_image;
     @BindView(R.id.posts_figure) TextView posts_figure;
-    @BindView(R.id.followers_figure) TextView followers_figure;
-    @BindView(R.id.following_figure) TextView following_figure;
+    TextView followers_figure;
+    TextView following_figure;
 
     String uId;
     String headerImage;
@@ -99,9 +104,15 @@ public class ProfileActivity extends BaseActivity {
         getSupportActionBar().setTitle("Profile");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        followers_figure = (TextView)findViewById(R.id.followers_figure);
+        following_figure = (TextView)findViewById(R.id.following_figure);
+
         uId = AppPreference.getCurrentUserId();
 
+        rootDatabaseHolder = FirebaseDatabase.getInstance().getReference();
+
         profileImagesStorage = FirebaseStorage.getInstance().getReference();
+
         userTable = FirebaseDatabase.getInstance().getReference().child("Users");
         userTable.keepSynced(true);
         userTable.child(uId).addValueEventListener(new ValueEventListener() {
@@ -137,6 +148,51 @@ public class ProfileActivity extends BaseActivity {
         });
 
 
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+        followersTable.keepSynced(true);
+
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        followingTable.keepSynced(true);
+
+        rootDatabaseHolder.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                fetchFollowers();
+                fetchFollowing();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("followers")){
+
+                }else{
+                    followers_figure.setText("0");
+                }
+
+                if(dataSnapshot.hasChild("following")){
+
+                }else{
+                    following_figure.setText("0");
+                }
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     @Override
@@ -148,6 +204,48 @@ public class ProfileActivity extends BaseActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void fetchFollowers(){
+        followersTable.child(uId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("accepted").exists()) {
+                    followers_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+
+                } else{
+                    followers_figure.setText("0");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void fetchFollowing(){
+        followingTable.child(uId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child("accepted").exists()){
+                    following_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+
+                }
+                else{
+                    following_figure.setText("0");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     @OnClick(R.id.user_profile_image)
@@ -425,8 +523,8 @@ public class ProfileActivity extends BaseActivity {
     }
     private UCrop basisConfig(@NonNull UCrop uCrop) {
         //uCrop = uCrop.useSourceImageAspectRatio();
-        uCrop = uCrop.withAspectRatio(167, 100);
-        // uCrop = uCrop.withMaxResultSize(300, 180);
+        uCrop = uCrop.withAspectRatio(160, 160);
+        //uCrop = uCrop.withMaxResultSize(200, 100);
         return uCrop;
     }
 

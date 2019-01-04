@@ -46,7 +46,6 @@ public class FoundFriendActivity extends BaseActivity {
     DatabaseReference userTable;
     DatabaseReference followersTable;
     DatabaseReference followingTable;
-    DataSnapshot ds;
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
     @BindView(R.id.user_header_image) ImageView user_header_image;
@@ -78,7 +77,7 @@ public class FoundFriendActivity extends BaseActivity {
     };
 
     int[] colors = new int[] {
-            Color.WHITE,
+            Color.parseColor("#54d9c8"),
             Color.RED,
             Color.GREEN,
             Color.BLUE
@@ -269,7 +268,7 @@ public class FoundFriendActivity extends BaseActivity {
                         if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("pending")) {
                             follow_button_text = "request sent";
                             follow_button.setText(follow_button_text);
-                            follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                            follow_button.setBackground(getResources().getDrawable(R.drawable.follow_button_drawable));
                             follow_button.setTextColor(getResources().getColor(R.color.customBlue));
                             follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check, 0, 0, 0);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
