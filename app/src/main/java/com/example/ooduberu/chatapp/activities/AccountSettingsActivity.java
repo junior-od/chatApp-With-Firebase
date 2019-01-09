@@ -111,7 +111,6 @@ public class AccountSettingsActivity extends BaseActivity {
         cancel_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                private_account_switch.setChecked(!accountTypeSwitch);
                 dialog.cancel();
             }
         });

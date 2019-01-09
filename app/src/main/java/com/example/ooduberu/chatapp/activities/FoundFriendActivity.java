@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.model.FollowBody;
+import com.example.ooduberu.chatapp.services.ChatAppService;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,6 +47,7 @@ public class FoundFriendActivity extends BaseActivity {
     DatabaseReference userTable;
     DatabaseReference followersTable;
     DatabaseReference followingTable;
+
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
     @BindView(R.id.user_header_image) ImageView user_header_image;
@@ -376,8 +378,9 @@ public class FoundFriendActivity extends BaseActivity {
                                             hideProgressLoader();
                                             if (task.isSuccessful()){
                                                 fetchFollowers();
-
                                                 Toasty.success(getBaseContext(),"now following").show();
+                                                sendNotification("follow_unlocked",uId,otherUsersId);
+
                                             }else{
                                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                             }
@@ -411,6 +414,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
                                     Toasty.success(getBaseContext(),"request sent").show();
+                                    sendNotification("follow_locked",uId,otherUsersId);
                                 }
                                 else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -449,7 +453,7 @@ public class FoundFriendActivity extends BaseActivity {
                                             if(task.isSuccessful()){
                                                 fetchFollowers();
                                                 Toasty.success(getBaseContext(),"now following").show();
-
+                                                sendNotification("follow_unlocked",uId,otherUsersId);
                                             }else{
                                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                             }

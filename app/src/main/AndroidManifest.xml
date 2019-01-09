@@ -74,6 +74,28 @@
             android:name=".activities.AccountSettingsActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".activities.SettingsActivity"/>
+        <service
+            android:name=".services.ChatAppService"
+            />
+
+
+        <service android:name=".services.FirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimaryDark" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="channel id" />
+
     </application>
 
 </manifest>
