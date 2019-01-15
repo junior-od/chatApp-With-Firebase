@@ -2,6 +2,7 @@ package com.example.ooduberu.chatapp.activities;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +36,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 
+import org.w3c.dom.Text;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -50,12 +53,12 @@ public class FoundFriendActivity extends BaseActivity {
 
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
-    @BindView(R.id.user_header_image) ImageView user_header_image;
-    @BindView(R.id.user_profile_image) ImageView user_profile_image;
-    @BindView(R.id.full_name) TextView full_name;
-    @BindView(R.id.user_name) TextView user_name;
-    @BindView(R.id.user_status) TextView user_status;
-    @BindView(R.id.posts_figure) TextView posts_figure;
+    ImageView user_header_image;
+    ImageView user_profile_image;
+    TextView full_name;
+    TextView user_name;
+    TextView user_status;
+    TextView posts_figure;
     TextView followers_figure;
     TextView following_figure;
     Button follow_button;
@@ -97,6 +100,12 @@ public class FoundFriendActivity extends BaseActivity {
         setSupportActionBar(mToolbar);//sets the action bar for the activity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        user_header_image = (ImageView)findViewById(R.id.user_header_image);
+        user_profile_image = (ImageView)findViewById(R.id.user_profile_image);
+        full_name = (TextView)findViewById(R.id.full_name);
+        user_name = (TextView)findViewById(R.id.user_name);
+        user_status = (TextView)findViewById(R.id.user_status);
+        posts_figure = (TextView)findViewById(R.id.posts_figure);
         followers_figure = (TextView)findViewById(R.id.followers_figure);
         following_figure = (TextView)findViewById(R.id.following_figure);
         follow_button = (Button)findViewById(R.id.follow_button);
@@ -736,6 +745,7 @@ public class FoundFriendActivity extends BaseActivity {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
+                                    sendNotification("follow_locked",uId,otherUsersId);
                                     Toasty.success(getBaseContext(),"request sent").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -744,10 +754,12 @@ public class FoundFriendActivity extends BaseActivity {
                         });
                     }else{
                         fetchFollowers();
+                        sendNotification("follow_locked",uId,otherUsersId);
                         Toasty.success(getBaseContext(),"request sent").show();
                     }
                 }else{
                     fetchFollowers();
+                    sendNotification("follow_locked",uId,otherUsersId);
                     Toasty.success(getBaseContext(),"request sent").show();
                 }
             }
@@ -774,8 +786,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
                                     fetchFollowing();
-
-                                    //follow_button.setText("following");
+                                    sendNotification("accept_follow_request",uId,otherUsersId);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -794,8 +805,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 if (task.isSuccessful()){
                                     fetchFollowers();
                                     fetchFollowing();
-
-                                    //follow_button.setText("following");
+                                    sendNotification("accept_follow_request",uId,otherUsersId);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -813,8 +823,7 @@ public class FoundFriendActivity extends BaseActivity {
                             if (task.isSuccessful()){
                                 fetchFollowers();
                                 fetchFollowing();
-
-                                //follow_button.setText("following");
+                                sendNotification("accept_follow_request",uId,otherUsersId);
                                 Toasty.success(getBaseContext(),"request accepted").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();

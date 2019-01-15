@@ -76,7 +76,7 @@ public class ProfileActivity extends BaseActivity {
     @BindView(R.id.app_navigate) Toolbar mToolbar;
     ImageView user_header_image;
     ImageView user_profile_image;
-    @BindView(R.id.posts_figure) TextView posts_figure;
+    TextView posts_figure;
     TextView followers_figure;
     TextView following_figure;
 
@@ -108,6 +108,7 @@ public class ProfileActivity extends BaseActivity {
         user_profile_image = (ImageView)findViewById(R.id.user_profile_image);
         followers_figure = (TextView)findViewById(R.id.followers_figure);
         following_figure = (TextView)findViewById(R.id.following_figure);
+        posts_figure = (TextView)findViewById(R.id.posts_figure);
 
         uId = AppPreference.getCurrentUserId();
 

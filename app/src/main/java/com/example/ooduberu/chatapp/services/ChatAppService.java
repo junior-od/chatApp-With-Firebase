@@ -19,9 +19,11 @@ public class ChatAppService extends IntentService {
 
     private static final String FOLLOW_UNLOCKED = "follow_unlocked";
     private static final String FOLLOW_LOCKED = "follow_locked";
+    private static final String ACCEPT_FOLLOW = "accept_follow_request";
 
     DatabaseReference followNotifications;
     DatabaseReference followRequestNotifications;
+    DatabaseReference acceptFollowRequestNotifications;
 
     String action_type;
     String user_id;
@@ -47,6 +49,10 @@ public class ChatAppService extends IntentService {
                 followLockedAccount(user_id,receiver_id);
                 break;
 
+            case ACCEPT_FOLLOW:
+                acceptFollowRequest(user_id,receiver_id);
+                break;
+
 
         }
 
@@ -62,7 +68,7 @@ public class ChatAppService extends IntentService {
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
         fnb.setMessage("just followed you !!!");
-        followNotifications.child(receiver_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
+        followNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -80,7 +86,7 @@ public class ChatAppService extends IntentService {
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
         fnb.setMessage("just followed you back !!!");
-        followRequestNotifications.child(receiver_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
+        followRequestNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -90,5 +96,23 @@ public class ChatAppService extends IntentService {
                 }
             }
         });
+    }
+
+    private void acceptFollowRequest(String user_id,String receiver_id){
+        acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
+        FollowNotificationBody fnb = new FollowNotificationBody();
+        fnb.setFrom(user_id);
+        fnb.setMessage("accepted request");
+        acceptFollowRequestNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i(TAG,"sent message sucessful");
+                }else{
+                    Log.i(TAG,task.getException().getMessage());
+                }
+            }
+        });
+
     }
 }

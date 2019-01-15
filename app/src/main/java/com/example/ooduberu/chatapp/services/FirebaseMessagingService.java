@@ -5,17 +5,24 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.ooduberu.chatapp.R;
+import com.example.ooduberu.chatapp.activities.AccountSettingsActivity;
 import com.example.ooduberu.chatapp.activities.SettingsActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Random;
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
@@ -140,62 +147,61 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
 
     //data type notification
-//    private void receiveDataMessage(RemoteMessage remoteMessage) {
-//        // Map<String, String> data = remoteMessage.getData();
-//        //for(String key : data.keySet()){
-//        //    String value = data.get(key);
-//        //    Log.d(TAG, "Key: " + key + " Value: " + value);
-//        // }
-//
-//        int notificationId = new Random().nextInt(60000);
-//        String channelId = getString(R.string.default_notification_channel_id);
-//        CharSequence adminChannelName = getString(R.string.notifications_admin_channel_name);
-//        String adminChannelDescription = getString(R.string.notifications_admin_channel_description);
-//
-//        Intent intent = new Intent(this, NotificationActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT);
-//
-////      Intent save = new Intent(this, SaveService.class);
-////      save.putExtra(SaveService.NOTIFICATION_ID_EXTRA, notificationId);
-////      save.putExtra(SaveService.IMAGE_URL_EXTRA, remoteMessage.getData().get("imageurl"));
-////      PendingIntent savePendingIntent = PendingIntent.getService(this, notificationId+1, save, PendingIntent.FLAG_ONE_SHOT);
-//
-//        Bitmap bitmap = getBitmapFromUrl(remoteMessage.getData().get("imageurl"));//obtain the image
-//        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
-//                .setSmallIcon(R.mipmap.ic_launcher_foreground)
-//                .setAutoCancel(true)
-//                .setSound(defaultSoundUri)
-//                .setContentIntent(pendingIntent);
-//
-//        if (!TextUtils.isEmpty(remoteMessage.getData().get("imageurl"))) {
-//            notificationBuilder.setStyle(
-//                    new NotificationCompat.BigPictureStyle()
-//                            .setBigContentTitle(remoteMessage.getData().get("title"))
-//                            .setSummaryText(remoteMessage.getData().get("body"))
-//                            .bigPicture(bitmap)
-//            );
-//            // .addAction(R.mipmap.ic_launcher, getString(R.string.notification_save_button), savePendingIntent)
-//        } else {
-//            notificationBuilder
-//                    .setContentTitle(remoteMessage.getData().get("title"))
-//                    .setContentText(remoteMessage.getData().get("body"));
-//            //.setLargeIcon(bitmap)
-//            //.setSmallIcon(R.mipmap.ic_launcher)
-//        }
-//
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            NotificationChannel channel = new NotificationChannel(channelId, adminChannelName, NotificationManager.IMPORTANCE_DEFAULT);
-//            channel.setDescription(adminChannelDescription);
-//            channel.enableLights(true);
-//            channel.setLightColor(Color.RED);
-//            channel.enableVibration(true);
-//            notificationManager.createNotificationChannel(channel);
-//        }
-//        notificationManager.notify(notificationId /* ID of notification */, notificationBuilder.build());
-//
+    private void receiveDataMessage(RemoteMessage remoteMessage) {
+        // Map<String, String> data = remoteMessage.getData();
+        //for(String key : data.keySet()){
+        //    String value = data.get(key);
+        //    Log.d(TAG, "Key: " + key + " Value: " + value);
+        // }
+        int notificationId = new Random().nextInt(60000);
+        String channelId = "channel id";
+        CharSequence adminChannelName = "channel name";
+        String adminChannelDescription = "channel desc";
+
+        Intent intent = new Intent(this, AccountSettingsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT);
+
+//      Intent save = new Intent(this, SaveService.class);
+//      save.putExtra(SaveService.NOTIFICATION_ID_EXTRA, notificationId);
+//      save.putExtra(SaveService.IMAGE_URL_EXTRA, remoteMessage.getData().get("imageurl"));
+//      PendingIntent savePendingIntent = PendingIntent.getService(this, notificationId+1, save, PendingIntent.FLAG_ONE_SHOT);
+
+        Bitmap bitmap = getBitmapFromUrl(remoteMessage.getData().get("icon"));//obtain the image
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        if (!TextUtils.isEmpty(remoteMessage.getData().get("icon"))) {
+            notificationBuilder.setStyle(
+                    new NotificationCompat.BigPictureStyle()
+                            .setBigContentTitle(remoteMessage.getData().get("title"))
+                            .setSummaryText(remoteMessage.getData().get("body"))
+                            .bigPicture(bitmap)
+            );
+            // .addAction(R.mipmap.ic_launcher, getString(R.string.notification_save_button), savePendingIntent)
+        } else {
+            notificationBuilder
+                    .setContentTitle(remoteMessage.getData().get("title"))
+                    .setContentText(remoteMessage.getData().get("body"));
+            //.setLargeIcon(bitmap)
+            //.setSmallIcon(R.mipmap.ic_launcher)
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, adminChannelName, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(adminChannelDescription);
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.enableVibration(true);
+            notificationManager.createNotificationChannel(channel);
+        }
+        notificationManager.notify(notificationId /* ID of notification */, notificationBuilder.build());
+
 //        NotificationDAO notificationDAO = AppDatabase.getInstance(this).getNotificationDAO();
 //        Notification notification = new Notification(NotificationType.TYPE_BACKEND);
 //        notification.setDate(new Date());
@@ -203,20 +209,20 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 //        notification.setTitle(remoteMessage.getData().get("title"));
 //        notification.setUnRead(true);
 //        notificationDAO.insert(notification);
-//    }
+    }
 
-//    private Bitmap getBitmapFromUrl(String imageUrl) {
-//        try {
-//            URL url = new URL(imageUrl);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setDoInput(true);
-//            connection.connect();
-//            InputStream inputStream = connection.getInputStream();
-//            return BitmapFactory.decodeStream(inputStream);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+    private Bitmap getBitmapFromUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream inputStream = connection.getInputStream();
+            return BitmapFactory.decodeStream(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
