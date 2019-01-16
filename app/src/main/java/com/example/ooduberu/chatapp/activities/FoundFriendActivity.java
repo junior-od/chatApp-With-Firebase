@@ -638,7 +638,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
-                                sendNotification("cancel_accept_request",uId,otherUsersId);
+                                sendNotification("cancel_accept_request",otherUsersId,uId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -656,7 +656,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
-                                sendNotification("cancel_accept_request",uId,otherUsersId);
+                                sendNotification("cancel_accept_request",otherUsersId,uId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
