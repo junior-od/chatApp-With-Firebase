@@ -20,6 +20,8 @@ public class ChatAppService extends IntentService {
     private static final String FOLLOW_UNLOCKED = "follow_unlocked";
     private static final String FOLLOW_LOCKED = "follow_locked";
     private static final String ACCEPT_FOLLOW = "accept_follow_request";
+    private static final String CANCEL_REQUEST = "cancel_request";
+    private static final String CANCEL_ACCEPT_REQUEST = "cancel_accept_request";
 
     DatabaseReference followNotifications;
     DatabaseReference followRequestNotifications;
@@ -53,13 +55,15 @@ public class ChatAppService extends IntentService {
                 acceptFollowRequest(user_id,receiver_id);
                 break;
 
+            case CANCEL_REQUEST:
+                cancelFollowRequest(user_id,receiver_id);
+                break;
+
+            case CANCEL_ACCEPT_REQUEST:
+                removeAcceptRequest(user_id,receiver_id);
+                break;
 
         }
-
-
-
-
-
 
     }
 
@@ -115,4 +119,39 @@ public class ChatAppService extends IntentService {
         });
 
     }
+
+    private void cancelFollowRequest(String user_id,String receiver_id){
+        followRequestNotifications = FirebaseDatabase.getInstance().getReference().child("followRequestNotification");
+        followRequestNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i(TAG,"canceled request notification sucessfully");
+                }else{
+                    Log.i(TAG,task.getException().getMessage());
+                }
+            }
+        });
+    }
+
+    private void removeAcceptRequest(String user_id, String receiver_id){
+        acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
+        acceptFollowRequestNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i(TAG,"cancel accept request sucessfully");
+                }else{
+                    Log.i(TAG,task.getException().getMessage());
+                }
+            }
+        });
+
+
+
+    }
+
+
+
+
 }

@@ -638,6 +638,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
+                                sendNotification("cancel_accept_request",uId,otherUsersId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -655,6 +656,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
+                                sendNotification("cancel_accept_request",uId,otherUsersId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -693,7 +695,7 @@ public class FoundFriendActivity extends BaseActivity {
                                             if(task.isSuccessful()){
                                                 fetchFollowers();
                                                 fetchFollowing();
-
+                                                sendNotification("cancel_request",uId,otherUsersId);
                                                 Toasty.success(getBaseContext(),"request cancelled").show();
                                             }
                                             else{
@@ -712,7 +714,7 @@ public class FoundFriendActivity extends BaseActivity {
                         fetchFollowers();
                         fetchFollowing();
                         setDefaultButtonText();
-
+                        sendNotification("cancel_request",uId,otherUsersId);
                         Toasty.success(getBaseContext(),"request cancelled").show();
                     }
                 }else{
@@ -720,7 +722,7 @@ public class FoundFriendActivity extends BaseActivity {
                     fetchFollowers();
                     fetchFollowing();
                     setDefaultButtonText();
-
+                    sendNotification("cancel_request",uId,otherUsersId);
                     Toasty.success(getBaseContext(),"request cancelled").show();
                 }
             }
@@ -787,6 +789,7 @@ public class FoundFriendActivity extends BaseActivity {
                                     fetchFollowers();
                                     fetchFollowing();
                                     sendNotification("accept_follow_request",uId,otherUsersId);
+                                    sendNotification("cancel_request",otherUsersId,uId);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -806,6 +809,7 @@ public class FoundFriendActivity extends BaseActivity {
                                     fetchFollowers();
                                     fetchFollowing();
                                     sendNotification("accept_follow_request",uId,otherUsersId);
+                                    sendNotification("cancel_request",otherUsersId,uId);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -824,6 +828,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 sendNotification("accept_follow_request",uId,otherUsersId);
+                                sendNotification("cancel_request",otherUsersId,uId);
                                 Toasty.success(getBaseContext(),"request accepted").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
