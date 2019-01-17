@@ -9,10 +9,14 @@ import android.view.ViewGroup;
 
 import com.example.ooduberu.chatapp.R;
 
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class FollowingFragment extends android.support.v4.app.Fragment {
+    Unbinder unbinder;
 
 
     public FollowingFragment() {
@@ -24,7 +28,14 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_following, container, false);
+        View v = inflater.inflate(R.layout.fragment_following, container, false);
+        unbinder = ButterKnife.bind(this,v);
+        return v;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
 }

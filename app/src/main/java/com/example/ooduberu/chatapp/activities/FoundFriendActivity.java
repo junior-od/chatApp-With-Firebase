@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -222,14 +223,22 @@ public class FoundFriendActivity extends BaseActivity {
     public void viewUserFollowers(){
         Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
         intent.putExtra("type","followers");
-        startActivity(intent);
+        intent.putExtra("userName",userName);
+        intent.putExtra("foundUserId",otherUsersId);
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, user_name,  "username");
+        startActivity(intent,options.toBundle());
     }
 
     @OnClick(R.id.view_following)
     public void viewUserFollowing(){
         Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
         intent.putExtra("type","following");
-        startActivity(intent);
+        intent.putExtra("userName",userName);
+        intent.putExtra("foundUserId",otherUsersId);
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, user_name,  "username");
+        startActivity(intent,options.toBundle());
     }
 
     @Override
@@ -315,7 +324,6 @@ public class FoundFriendActivity extends BaseActivity {
     }
 
     private void fetchFollowing(){
-
         followingTable.child(otherUsersId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -654,6 +662,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowing();
                                 setDefaultButtonText();
                                 sendNotification("cancel_accept_request",otherUsersId,uId);
+                                sendNotification("cancel_follow_notification",uId,otherUsersId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -672,6 +681,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowing();
                                 setDefaultButtonText();
                                 sendNotification("cancel_accept_request",otherUsersId,uId);
+                                sendNotification("cancel_follow_notification",uId,otherUsersId);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();

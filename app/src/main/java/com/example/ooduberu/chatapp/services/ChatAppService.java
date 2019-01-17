@@ -22,6 +22,7 @@ public class ChatAppService extends IntentService {
     private static final String ACCEPT_FOLLOW = "accept_follow_request";
     private static final String CANCEL_REQUEST = "cancel_request";
     private static final String CANCEL_ACCEPT_REQUEST = "cancel_accept_request";
+    private static final String CANCEL_FOLLOW_NOTIFICATION = "cancel_follow_notification";
 
     DatabaseReference followNotifications;
     DatabaseReference followRequestNotifications;
@@ -61,6 +62,10 @@ public class ChatAppService extends IntentService {
 
             case CANCEL_ACCEPT_REQUEST:
                 removeAcceptRequest(user_id,receiver_id);
+                break;
+
+            case CANCEL_FOLLOW_NOTIFICATION:
+                cancelFollowNotification(user_id,receiver_id);
                 break;
 
         }
@@ -147,7 +152,20 @@ public class ChatAppService extends IntentService {
             }
         });
 
+    }
 
+    private void cancelFollowNotification(String user_id,String receiver_id){
+        followNotifications = FirebaseDatabase.getInstance().getReference().child("followNotification");
+        followNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i(TAG,"cancel follow notification sucessfully");
+                }else{
+                    Log.i(TAG,task.getException().getMessage());
+                }
+            }
+        });
 
     }
 

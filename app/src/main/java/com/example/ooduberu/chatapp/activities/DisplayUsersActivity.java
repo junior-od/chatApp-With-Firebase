@@ -1,6 +1,8 @@
 package com.example.ooduberu.chatapp.activities;
 
 import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,12 @@ import android.widget.TextView;
 
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.adapters.DisplayUsersPagerAdapter;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
@@ -21,23 +29,29 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import es.dmoral.toasty.Toasty;
 
 public class DisplayUsersActivity extends AppCompatActivity {
     Unbinder unbinder;
     DisplayUsersPagerAdapter displayUsersPagerAdapter;
     TabLayout tabbed_layout;
     ViewPager viewPager;
+    DatabaseReference rootDatabaseHolder;
+    DatabaseReference followersTable;
+    DatabaseReference followingTable;
 
     //for the tabs
     TextView followers_figure;
     TextView following_figure;
-
     TextView figure_title1;
     TextView figure_title2;
 
     @BindView(R.id.title) TextView title;
 
     ArrayList<String> navTitles = new ArrayList<>();
+
+    String userName;
+    String foundUserId;
 
 
     @Override
@@ -46,6 +60,59 @@ public class DisplayUsersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_display_users);
 
         unbinder = ButterKnife.bind(this);
+
+        foundUserId = getIntent().getStringExtra("foundUserId");
+
+
+        //firebase database manipulation
+        rootDatabaseHolder = FirebaseDatabase.getInstance().getReference();
+
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+        followersTable.keepSynced(true);
+
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        followingTable.keepSynced(true);
+
+        rootDatabaseHolder.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                getFollowersCount();
+                getFollowingCount();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("followers")){
+
+                }else{
+                    followers_figure.setText("0");
+                }
+
+                if(dataSnapshot.hasChild("following")){
+
+                }else{
+                    following_figure.setText("0");
+                }
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
         navTitles.clear();
         navTitles.add("FOLLOWERS");
         navTitles.add("FOLLOWING");
@@ -56,6 +123,9 @@ public class DisplayUsersActivity extends AppCompatActivity {
 //        tabbed_layout.addTab(tabbed_layout.newTab().setText("56576\nfollowers"));
 //        tabbed_layout.addTab(tabbed_layout.newTab().setText("following"));
         //tabbed_layout.setupWithViewPager(viewPager);
+        userName = getIntent().getStringExtra("userName");
+        title.setText("@"+userName);
+
         displayUsersPagerAdapter = new DisplayUsersPagerAdapter(getSupportFragmentManager(),2);
         viewPager.setAdapter(displayUsersPagerAdapter);
         tabbed_layout.setupWithViewPager(viewPager);
@@ -113,12 +183,12 @@ public class DisplayUsersActivity extends AppCompatActivity {
         if(getIntent().getStringExtra("type").equalsIgnoreCase("followers")){
             viewPager.setCurrentItem(0);
             setUpTabs(0);
-           // setupTabbedLayout(0);
+
         }else {
             viewPager.setCurrentItem(1);
             setUpTabs(1);
-            //setupTabbedLayout(1);
         }
+
 
     }
 
@@ -127,10 +197,57 @@ public class DisplayUsersActivity extends AppCompatActivity {
         onBackPressed();
     }
 
+    private void getFollowersCount(){
+        followersTable.child(foundUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("accepted").exists()) {
+                    followersTable.child(foundUserId).child("accepted").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            followers_figure.setText(dataSnapshot.getChildrenCount() + "");
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void getFollowingCount(){
+        followingTable.child(foundUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    if (dataSnapshot.child("accepted").exists()){
+                        following_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void setUpTabs(int type){
         LinearLayout tab1 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.display_user_custom_tab_layout, null);
         followers_figure = (TextView)tab1.findViewById(R.id.figure);
-        followers_figure.setText("0");
+
+       // followers_figure.setText(followersCount);
         figure_title1 = (TextView)tab1.findViewById(R.id.figure_title);
         figure_title1.setText("FOLLOWERS");
         tabbed_layout.getTabAt(0).setCustomView(tab1);
@@ -155,6 +272,7 @@ public class DisplayUsersActivity extends AppCompatActivity {
         }
     }
 
+    //unused for now
     private void setupTabbedLayout(int type){
 //        // loop through all navigation tabs
         for (int i = 0; i < tabbed_layout.getTabCount(); i++) {
