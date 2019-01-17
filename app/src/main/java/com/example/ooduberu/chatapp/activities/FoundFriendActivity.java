@@ -1,5 +1,6 @@
 package com.example.ooduberu.chatapp.activities;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.media.Image;
@@ -215,6 +216,20 @@ public class FoundFriendActivity extends BaseActivity {
         });
 
 
+    }
+
+    @OnClick(R.id.view_followers)
+    public void viewUserFollowers(){
+        Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
+        intent.putExtra("type","followers");
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.view_following)
+    public void viewUserFollowing(){
+        Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
+        intent.putExtra("type","following");
+        startActivity(intent);
     }
 
     @Override

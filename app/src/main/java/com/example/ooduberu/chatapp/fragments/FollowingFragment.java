@@ -12,10 +12,10 @@ import com.example.ooduberu.chatapp.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class followersFragment extends Fragment {
+public class FollowingFragment extends android.support.v4.app.Fragment {
 
 
-    public followersFragment() {
+    public FollowingFragment() {
         // Required empty public constructor
     }
 
@@ -24,7 +24,7 @@ public class followersFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_followers, container, false);
+        return inflater.inflate(R.layout.fragment_following, container, false);
     }
 
 }

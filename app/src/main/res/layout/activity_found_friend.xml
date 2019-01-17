@@ -26,7 +26,10 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:scaleType="fitXY"
-            android:src="@drawable/default_header_background" />
+            android:src="@drawable/default_header_background"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/user_profile_image"
@@ -126,6 +129,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/view_followers"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -148,6 +152,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/view_following"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

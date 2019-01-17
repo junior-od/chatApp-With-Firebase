@@ -22,7 +22,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.displayUsersActivity"></activity>
+        <activity android:name=".activities.DisplayUsersActivity"></activity>
         <activity
             android:name=".activities.SplashScreenActivity"
             android:screenOrientation="portrait">
