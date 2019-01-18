@@ -7,15 +7,19 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.ooduberu.chatapp.model.FollowNotificationBody;
+import com.example.ooduberu.chatapp.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import es.dmoral.toasty.Toasty;
+import java.util.ArrayList;
 
-public class ChatAppService extends IntentService {
-    private static final String TAG = ChatAppService.class.getSimpleName();
+public class ChatAppNotificationService extends IntentService {
+    private static final String TAG = ChatAppNotificationService.class.getSimpleName();
 
     private static final String FOLLOW_UNLOCKED = "follow_unlocked";
     private static final String FOLLOW_LOCKED = "follow_locked";
@@ -28,13 +32,13 @@ public class ChatAppService extends IntentService {
     DatabaseReference followRequestNotifications;
     DatabaseReference acceptFollowRequestNotifications;
 
+
     String action_type;
     String user_id;
     String receiver_id;
 
-
-    public ChatAppService() {
-        super("ChatAppService");
+    public ChatAppNotificationService() {
+        super("ChatAppNotificationService");
     }
 
     @Override
@@ -168,8 +172,5 @@ public class ChatAppService extends IntentService {
         });
 
     }
-
-
-
 
 }

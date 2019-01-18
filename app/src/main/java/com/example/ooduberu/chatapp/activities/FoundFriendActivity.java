@@ -3,18 +3,12 @@ package com.example.ooduberu.chatapp.activities;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.button.MaterialButton;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,7 +19,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.model.FollowBody;
-import com.example.ooduberu.chatapp.services.ChatAppService;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,9 +29,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-
-import org.w3c.dom.Text;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -221,6 +211,7 @@ public class FoundFriendActivity extends BaseActivity {
 
     @OnClick(R.id.view_followers)
     public void viewUserFollowers(){
+        fetchFollowersAndFollowingData("get_followers_details",otherUsersId);
         Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
         intent.putExtra("type","followers");
         intent.putExtra("userName",userName);

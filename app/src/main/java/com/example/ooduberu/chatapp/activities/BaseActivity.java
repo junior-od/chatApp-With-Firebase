@@ -1,6 +1,5 @@
 package com.example.ooduberu.chatapp.activities;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,7 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.example.ooduberu.chatapp.dialogs.ProgressDialogController;
 import com.example.ooduberu.chatapp.interfaces.Listener;
-import com.example.ooduberu.chatapp.services.ChatAppService;
+import com.example.ooduberu.chatapp.services.ChatAppFetchFollowersAndFollowingService;
+import com.example.ooduberu.chatapp.services.ChatAppNotificationService;
 
 public class BaseActivity extends AppCompatActivity implements Listener {
     ProgressDialogController progressDialogController;
@@ -44,10 +44,19 @@ public class BaseActivity extends AppCompatActivity implements Listener {
 
     @Override
     public void sendNotification(String actionType, String user_id, String receiver_id) {
-        Intent intent = new Intent(this, ChatAppService.class);
+        Intent intent = new Intent(this, ChatAppNotificationService.class);
         intent.putExtra("actionType",actionType);
         intent.putExtra("userId",user_id);
         intent.putExtra("receiverId",receiver_id);
         startService(intent);
+    }
+
+    @Override
+    public void fetchFollowersAndFollowingData(String type, String user_id) {
+        Intent intent = new Intent(this, ChatAppFetchFollowersAndFollowingService.class);
+        intent.putExtra("type",type);
+        intent.putExtra("userId",user_id);
+        startService(intent);
+
     }
 }

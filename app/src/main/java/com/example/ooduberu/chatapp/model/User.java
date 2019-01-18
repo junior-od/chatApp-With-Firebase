@@ -2,9 +2,18 @@ package com.example.ooduberu.chatapp.model;
 
 public class User {
     String first_name,last_name,user_name,email,image,chat_background_image,status,device_token,header_image,account_type;
+    String user_id;
 
     public User(){
 
+    }
+
+    public User(String first_name,String last_name,String user_name,String image,String user_id){
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.user_name = user_name;
+        this.image = image;
+        this.user_id = user_id;
     }
 
     public User(String first_name, String last_name, String user_name, String email, String image, String chat_background_image, String status, String device_token,String header_image,String account_type) {
@@ -18,6 +27,14 @@ public class User {
         this.device_token = device_token;
         this.header_image = header_image;
         this.account_type = account_type;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public String getFirst_name() {

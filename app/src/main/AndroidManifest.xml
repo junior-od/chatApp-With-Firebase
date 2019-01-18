@@ -21,7 +21,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".activities.DisplayUsersActivity"></activity>
         <activity
             android:name=".activities.SplashScreenActivity"
@@ -74,7 +75,9 @@
             android:parentActivityName=".activities.SettingsActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name=".services.ChatAppService" />
+        <service android:name=".services.ChatAppNotificationService" />
+        <service android:name=".services.ChatAppFetchFollowersAndFollowingService" />
+
         <service android:name=".services.FirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
