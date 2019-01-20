@@ -20,8 +20,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -119,27 +122,43 @@ public class LoginActivity extends BaseActivity {
         showProgressLoader();
         mAuth.signInWithEmailAndPassword(userEmail,userPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                hideProgressLoader();
+            public void onComplete(@NonNull final Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     getDeviceToken = FirebaseInstanceId.getInstance().getToken();
                     AppPreference.setCurrentUserId(mAuth.getCurrentUser().getUid());
 
                     //incase a user logs on on a new device replace old device token with new device token
-
-                    users_table = users_table.child(AppPreference.getCurrentUserId()).child("device_token");
-                    users_table.setValue(getDeviceToken).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    users_table.child(AppPreference.getCurrentUserId()).addValueEventListener(new ValueEventListener() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            hideProgressLoader();
                             if(task.isSuccessful()){
-                                startActivity(new Intent(getBaseContext(),HomeActivity.class));
-                                finish();
-                            }else{
+                                AppPreference.setCurrentUserName(dataSnapshot.child("user_name").getValue().toString());
+                                users_table.child(AppPreference.getCurrentUserId()).child("device_token").setValue(getDeviceToken).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            startActivity(new Intent(getBaseContext(),HomeActivity.class));
+                                            finish();
+                                        }else{
+                                            Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                                        }
+                                    }
+                                });
+                            }
+                            else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                             }
                         }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
                     });
+
                 }else{
+                    hideProgressLoader();
                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                 }
             }

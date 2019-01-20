@@ -34,6 +34,7 @@ public class HomeActivity extends BaseActivity {
         mAuth = FirebaseAuth.getInstance();
 
         Toasty.success(getBaseContext(), AppPreference.getCurrentUserId()).show();
+        Toasty.error(getBaseContext(),AppPreference.getCurrentUserName()).show();
     }
 
     @Override

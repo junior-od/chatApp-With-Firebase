@@ -67,7 +67,7 @@ public class SignUpActivity extends BaseActivity {
         unbinder = ButterKnife.bind(this);
 
         mAuth = FirebaseAuth.getInstance();
-        getTokenDevice = FirebaseInstanceId.getInstance().getId();
+        getTokenDevice = FirebaseInstanceId.getInstance().getToken();
         database = FirebaseDatabase.getInstance();//gets the instance of the firedatabase
     }
 
@@ -192,6 +192,7 @@ public class SignUpActivity extends BaseActivity {
                     getCurrentUser = FirebaseAuth.getInstance().getCurrentUser();//gets the current user
                     uId = getCurrentUser.getUid();
                     AppPreference.setCurrentUserId(uId);
+                    AppPreference.setCurrentUserName(user_information.getUser_name());
                     database_ref = database.getReference().child("Users").child(uId);
                     database_ref.setValue(user_information);//pushes the object date of user information in the User data table in the database
 

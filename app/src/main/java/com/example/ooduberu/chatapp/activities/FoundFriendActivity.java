@@ -385,6 +385,7 @@ public class FoundFriendActivity extends BaseActivity {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
+            followBody.setUser_name(AppPreference.getCurrentUserName());
             followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -461,6 +462,7 @@ public class FoundFriendActivity extends BaseActivity {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
+            followBody.setUser_name(AppPreference.getCurrentUserName());
             followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -541,6 +543,7 @@ public class FoundFriendActivity extends BaseActivity {
         showProgressLoader();
         final FollowBody followBody = new FollowBody();
         followBody.setRequest_type("accepted");
+        followBody.setUser_name(AppPreference.getCurrentUserName());
         followersTable.child(uId).child("accepted").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

@@ -9,6 +9,7 @@ public class AppPreference {
 
      private static final String IS_FIRST_TIME_LAUNCH = "is_first_time_launch";
      private static final String CURRENT_USER_ID = "current_user_id";
+     private static final String CURRENT_USERNAME = "current_user_name";
 
 
     public static SharedPreferences setUpDefault(Context context) {
@@ -41,5 +42,21 @@ public class AppPreference {
         return null;
 
     }
+
+    public static void setCurrentUserName(String userName){
+        if (sharedPreferences != null){
+            sharedPreferences.edit().putString(CURRENT_USERNAME, userName).apply();
+        }
+    }
+
+    public static String getCurrentUserName(){
+        if (sharedPreferences != null){
+            return sharedPreferences.getString(CURRENT_USERNAME,"");
+        }
+        return null;
+
+    }
+
+
 
 }

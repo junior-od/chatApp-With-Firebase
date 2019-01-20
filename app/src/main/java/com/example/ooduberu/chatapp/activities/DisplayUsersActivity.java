@@ -126,7 +126,7 @@ public class DisplayUsersActivity extends AppCompatActivity {
         userName = getIntent().getStringExtra("userName");
         title.setText("@"+userName);
 
-        displayUsersPagerAdapter = new DisplayUsersPagerAdapter(getSupportFragmentManager(),2);
+        displayUsersPagerAdapter = new DisplayUsersPagerAdapter(getSupportFragmentManager(),2,foundUserId);
         viewPager.setAdapter(displayUsersPagerAdapter);
         tabbed_layout.setupWithViewPager(viewPager);
 
