@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.button.MaterialButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -44,11 +48,18 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     DatabaseReference followersTable;
     DatabaseReference followingTable;
 
+    Query query;
+
     FirebaseRecyclerOptions<FollowBody> options;
     FirebaseRecyclerAdapter<FollowBody,FollowersViewHolder> adapter;
 
     @BindView(R.id.find_user_searchview) SearchView find_user_searchview;
     @BindView(R.id.display_users_recycler_view) RecyclerView display_users_recycler_view;
+
+    ArrayList<String> followingKeys = new ArrayList<>();
+    ArrayList<String> acceptRequestKeys = new ArrayList<>();
+    ArrayList<String> requestSentKeys = new ArrayList<>();
+    ArrayList<String> followbackKeys = new ArrayList<>();
 
     String foundUserId;
 
@@ -78,9 +89,56 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
         userTable = FirebaseDatabase.getInstance().getReference().child("Users");
         followersTable = FirebaseDatabase.getInstance().getReference().child("followers").child(foundUserId).child("accepted");
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+
+        followersTable.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                followingKeys.clear();
+                acceptRequestKeys.clear();
+                final String theFollowerId = dataSnapshot.getKey();
+                followersTable.child(theFollowerId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.child("accepted").exists()){
+                            if(dataSnapshot.child("accepted").child(foundUserId).exists()){
+                                if (dataSnapshot.child("accepted").child(foundUserId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
+                                    followingKeys.add(theFollowerId);
+
+                                }else if (dataSnapshot.child("accepted").child(foundUserId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+                                    acceptRequestKeys.add(theFollowerId);
+                                }
+                            }
+
+                        }
+
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         display_users_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
         display_users_recycler_view.setHasFixedSize(true);
+        findUser("");
+
         find_user_searchview.onActionViewExpanded();
         find_user_searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -127,8 +185,13 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
 
     private void findUser(String s){
-        //fetch all followers
-        Query query = followersTable.orderByChild("user_name");
+        if(TextUtils.isEmpty(s)){
+            //fetch all followers
+            query = followersTable.orderByChild("user_name");
+        }else{
+            //fetch for currently searched follower
+            query = followersTable.orderByChild("user_name").startAt(s).endAt(s + "\uf8ff");
+        }
 
         options =
                 new FirebaseRecyclerOptions.Builder<FollowBody>()
@@ -138,13 +201,18 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
         adapter = new FirebaseRecyclerAdapter<FollowBody, FollowersViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull final FollowersViewHolder holder, int position, @NonNull FollowBody model) {
+                if(followingKeys.contains(getRef(position).getKey())){
+                    holder.setButton("following");
+                }else{
+                    holder.setButton("follow");
+                }
+
                 userTable.child(getRef(position).getKey()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         holder.setFullName(dataSnapshot.child("first_name").getValue().toString()+dataSnapshot.child("last_name").getValue().toString());
                         holder.setUserName(dataSnapshot.child("user_name").getValue().toString());
                         holder.setImage(dataSnapshot.child("image").getValue().toString(),getContext());
-
 
                     }
 
@@ -181,6 +249,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
         TextView userName;
         TextView  fullName;
         CircleImageView user_image;
+        MaterialButton follow_button;
 
         public FollowersViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -214,6 +283,11 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
             }
 
+        }
+
+        public void setButton(String text){
+            follow_button = (MaterialButton)userView.findViewById(R.id.follow_button);
+            follow_button.setText(text);
         }
     }
 
