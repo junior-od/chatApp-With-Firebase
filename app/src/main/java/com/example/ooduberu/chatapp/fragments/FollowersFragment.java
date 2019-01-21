@@ -2,11 +2,15 @@ package com.example.ooduberu.chatapp.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.button.MaterialButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -14,12 +18,17 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.ooduberu.chatapp.R;
+import com.example.ooduberu.chatapp.activities.FoundFriendActivity;
+import com.example.ooduberu.chatapp.activities.ProfileActivity;
 import com.example.ooduberu.chatapp.model.FollowBody;
+import com.example.ooduberu.chatapp.utility.AppPreference;
+import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -46,6 +55,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     DatabaseReference rootDatabaseHolder;
     DatabaseReference userTable;
     DatabaseReference followersTable;
+    DatabaseReference followersTableTemp;
     DatabaseReference followingTable;
 
     Query query;
@@ -89,6 +99,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
         userTable = FirebaseDatabase.getInstance().getReference().child("Users");
         followersTable = FirebaseDatabase.getInstance().getReference().child("followers").child(foundUserId).child("accepted");
+        followersTableTemp = FirebaseDatabase.getInstance().getReference().child("followers");
         followingTable = FirebaseDatabase.getInstance().getReference().child("following");
 
         followersTable.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -96,32 +107,62 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 followingKeys.clear();
                 acceptRequestKeys.clear();
-                final String theFollowerId = dataSnapshot.getKey();
-                followersTable.child(theFollowerId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.child("accepted").exists()){
-                            if(dataSnapshot.child("accepted").child(foundUserId).exists()){
-                                if (dataSnapshot.child("accepted").child(foundUserId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
-                                    followingKeys.add(theFollowerId);
+                requestSentKeys.clear();
+                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                    final String theFollowerId = ds.getKey();
+                    followersTableTemp.child(theFollowerId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.child("accepted").exists()){
+                                if(dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).exists()){
+                                    if (dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
+                                        followingKeys.add(theFollowerId);
 
-                                }else if (dataSnapshot.child("accepted").child(foundUserId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+                                    }
+//                                    else if (dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+//                                        acceptRequestKeys.add(theFollowerId);
+//                                    }
+                                }
+
+                            }
+
+                            if(dataSnapshot.child("pending").exists()){
+                                if(dataSnapshot.child("pending").child(AppPreference.getCurrentUserId()).exists()){
+                                    if (dataSnapshot.child("pending").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("pending")) {
+                                        requestSentKeys.add(theFollowerId);
+                                    }
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    followingTable.child(theFollowerId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.child("pending").child(AppPreference.getCurrentUserId()).exists()){
+                                if (dataSnapshot.child("pending").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("follow back")){
+                                   followbackKeys.add(theFollowerId);
+                                }
+                                else if (dataSnapshot.child("pending").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("pending")){
                                     acceptRequestKeys.add(theFollowerId);
                                 }
                             }
 
                         }
 
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                        }
+                    });
 
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+                }
 
 
 
@@ -134,6 +175,8 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
             }
         });
+
+
 
         display_users_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
         display_users_recycler_view.setHasFixedSize(true);
@@ -200,17 +243,48 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
         adapter = new FirebaseRecyclerAdapter<FollowBody, FollowersViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull final FollowersViewHolder holder, int position, @NonNull FollowBody model) {
+            protected void onBindViewHolder(@NonNull final FollowersViewHolder holder, final int position, @NonNull FollowBody model) {
+                holder.userView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewUserProfile(getRef(position).getKey(),holder.user_image);
+                    }
+                });
+
+                if(getRef(position).getKey().equals(AppPreference.getCurrentUserId())){
+                    holder.follow_button.setVisibility(View.GONE);
+                }
+
+
                 if(followingKeys.contains(getRef(position).getKey())){
                     holder.setButton("following");
-                }else{
+                }
+                else if(acceptRequestKeys.contains(getRef(position).getKey())){
+                    holder.setButton("accept request");
+
+                }
+                else if(followbackKeys.contains(getRef(position).getKey())){
+                    holder.setButton("follow back");
+                }
+                else if(requestSentKeys.contains(getRef(position).getKey())){
+                    holder.setButton("request sent");
+                }
+                else{
                     holder.setButton("follow");
                 }
+
+                holder.follow_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toasty.error(getContext(),getRef(position).getKey()).show();
+                    }
+                });
+
 
                 userTable.child(getRef(position).getKey()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        holder.setFullName(dataSnapshot.child("first_name").getValue().toString()+dataSnapshot.child("last_name").getValue().toString());
+                        holder.setFullName(dataSnapshot.child("first_name").getValue().toString()+" "+dataSnapshot.child("last_name").getValue().toString());
                         holder.setUserName(dataSnapshot.child("user_name").getValue().toString());
                         holder.setImage(dataSnapshot.child("image").getValue().toString(),getContext());
 
@@ -255,7 +329,8 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             super(itemView);
 
             userView = itemView;
-            user_image =(CircleImageView)userView.findViewById(R.id.user_image);
+            user_image = (CircleImageView)userView.findViewById(R.id.user_image);
+            follow_button = (MaterialButton)userView.findViewById(R.id.follow_button);
         }
 
 
@@ -286,9 +361,25 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
         }
 
         public void setButton(String text){
-            follow_button = (MaterialButton)userView.findViewById(R.id.follow_button);
             follow_button.setText(text);
         }
+    }
+
+    private void viewUserProfile(String userId, ImageView sharedImageView){
+        DeviceUtils.hideKeyboard(getActivity());
+        if(userId.equals(AppPreference.getCurrentUserId())){
+            Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(getActivity(), sharedImageView,  "profile");
+            startActivity(intent,options.toBundle());
+        }else{
+            Intent intent = new Intent(getActivity(), FoundFriendActivity.class).putExtra("otherUsersId",userId);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(getActivity(), sharedImageView,  "profile");
+            startActivity(intent,options.toBundle());
+        }
+
+
     }
 
 
