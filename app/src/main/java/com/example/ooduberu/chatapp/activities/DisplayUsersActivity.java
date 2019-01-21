@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.adapters.DisplayUsersPagerAdapter;
+import com.example.ooduberu.chatapp.custom.RefreshActivity;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,7 +32,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import es.dmoral.toasty.Toasty;
 
-public class DisplayUsersActivity extends AppCompatActivity {
+public class DisplayUsersActivity extends BaseActivity {
     Unbinder unbinder;
     DisplayUsersPagerAdapter displayUsersPagerAdapter;
     TabLayout tabbed_layout;
@@ -154,8 +155,8 @@ public class DisplayUsersActivity extends AppCompatActivity {
                 }
 
             }
-
             @Override
+
             public void onPageScrollStateChanged(int i) {
 
             }

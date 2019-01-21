@@ -20,4 +20,5 @@ public class ChatApplication extends Application {
     public static ChatApplication getInstance() {
         return instance;
     }
+
 }

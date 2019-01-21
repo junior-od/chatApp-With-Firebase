@@ -23,7 +23,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.DisplayUsersActivity"></activity>
         <activity
             android:name=".activities.SplashScreenActivity"
             android:screenOrientation="portrait">
@@ -74,6 +73,10 @@
             android:name=".activities.AccountSettingsActivity"
             android:parentActivityName=".activities.SettingsActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.DisplayUsersActivity"
+            android:screenOrientation="portrait"
+            />
 
         <service android:name=".services.ChatAppNotificationService" />
         <service android:name=".services.ChatAppFetchFollowersAndFollowingService" />
