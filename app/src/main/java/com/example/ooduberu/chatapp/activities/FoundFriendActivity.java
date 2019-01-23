@@ -181,17 +181,19 @@ public class FoundFriendActivity extends BaseActivity {
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 //Toasty.success(getBaseContext(),"removed").show();
-                if(dataSnapshot.hasChild("followers")){
-
-                }else{
-                    followers_figure.setText("0");
-                }
-
-                if(dataSnapshot.hasChild("following")){
-
-                }else{
-                    following_figure.setText("0");
-                }
+//                if(dataSnapshot.hasChild("followers")){
+//
+//                }else{
+//                    followers_figure.setText("0");
+//                }
+//
+//                if(dataSnapshot.hasChild("following")){
+//
+//                }else{
+//                    following_figure.setText("0");
+//                }
+                fetchFollowers();
+                fetchFollowing();
 
             }
 
@@ -256,54 +258,62 @@ public class FoundFriendActivity extends BaseActivity {
         followersTable.child(otherUsersId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.child("accepted").exists()){
-                    followersTable.child(otherUsersId).child("accepted").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            followers_figure.setText(dataSnapshot.getChildrenCount()+"");
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                    if(dataSnapshot.child("accepted").child(uId).exists()){
-                        if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
-                            follow_button_text = "following";
-                            follow_button.setText(follow_button_text);
-                            follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
-                            follow_button.setTextColor(getResources().getColor(R.color.customBlue));
-                            follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                follow_button.setCompoundDrawableTintList(myList);
+                if(dataSnapshot.exists()){
+                    if(dataSnapshot.child("accepted").exists()){
+                        followersTable.child(otherUsersId).child("accepted").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                followers_figure.setText(dataSnapshot.getChildrenCount()+"");
                             }
-                        }else if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
-                            follow_button_text = "accept request";
-                            follow_button.setText(follow_button_text);
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                        if(dataSnapshot.child("accepted").child(uId).exists()){
+                            if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
+                                follow_button_text = "following";
+                                follow_button.setText(follow_button_text);
+                                follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                                follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                                follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    follow_button.setCompoundDrawableTintList(myList);
+                                }
+                            }else if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+                                follow_button_text = "accept request";
+                                follow_button.setText(follow_button_text);
+                            }
+
                         }
 
+                    }else{
+                        followers_figure.setText("0");
                     }
+
+                    if(dataSnapshot.child("pending").exists()){
+                        if(dataSnapshot.child("pending").child(uId).exists()){
+                            if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("pending")) {
+                                follow_button_text = "request sent";
+                                follow_button.setText(follow_button_text);
+                                follow_button.setBackground(getResources().getDrawable(R.drawable.follow_button_drawable));
+                                follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                                follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check, 0, 0, 0);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    follow_button.setCompoundDrawableTintList(myList);
+                                }
+                            }
+                        }
+                    }
+
 
                 }else{
                     followers_figure.setText("0");
+                    follow_button_text = "";
+                    setDefaultButtonText();
                 }
 
-                if(dataSnapshot.child("pending").exists()){
-                    if(dataSnapshot.child("pending").child(uId).exists()){
-                        if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("pending")) {
-                            follow_button_text = "request sent";
-                            follow_button.setText(follow_button_text);
-                            follow_button.setBackground(getResources().getDrawable(R.drawable.follow_button_drawable));
-                            follow_button.setTextColor(getResources().getColor(R.color.customBlue));
-                            follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check, 0, 0, 0);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                follow_button.setCompoundDrawableTintList(myList);
-                            }
-                        }
-                    }
-                }
 
             }
 
@@ -323,30 +333,37 @@ public class FoundFriendActivity extends BaseActivity {
                     if (dataSnapshot.child("accepted").exists()){
                         following_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
 
+                    }else{
+                        following_figure.setText("0");
                     }
-                }
-                if(dataSnapshot.child("pending").child(uId).exists()){
-                    if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("follow back")){
-                        follow_button_text = "follow back";
-                        follow_button.setText(follow_button_text);
-                        follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
-                        follow_button.setTextColor(getResources().getColor(R.color.customBlue));
-                        follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add, 0, 0, 0);
-                        // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            follow_button.setCompoundDrawableTintList(myList);
+                    if(dataSnapshot.child("pending").child(uId).exists()){
+                        if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("follow back")){
+                            follow_button_text = "follow back";
+                            follow_button.setText(follow_button_text);
+                            follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                            follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                            follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add, 0, 0, 0);
+                            // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                follow_button.setCompoundDrawableTintList(myList);
+                            }
+                        }
+                        else if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("pending")){
+                            follow_button_text = "accept request";
+                            follow_button.setText(follow_button_text);
+                            follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                            follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                            // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                follow_button.setCompoundDrawableTintList(myList);
+                            }
                         }
                     }
-                    else if (dataSnapshot.child("pending").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("pending")){
-                        follow_button_text = "accept request";
-                        follow_button.setText(follow_button_text);
-                        follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
-                        follow_button.setTextColor(getResources().getColor(R.color.customBlue));
-                        // follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            follow_button.setCompoundDrawableTintList(myList);
-                        }
-                    }
+
+                }else{
+                    following_figure.setText("0");
+//                    follow_button_text = "";
+//                    setDefaultButtonText();
                 }
 
             }
@@ -411,15 +428,17 @@ public class FoundFriendActivity extends BaseActivity {
                                         }
                                     });
                                 }else{
+                                    hideProgressLoader();
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                 }
                             }
                         });
-                                } else{
-                                    Toasty.error(getBaseContext(),task.getException().getMessage()).show();
-                                }
-                            }
-                        });
+                    } else{
+                        hideProgressLoader();
+                        Toasty.error(getBaseContext(),task.getException().getMessage()).show();
+                    }
+                }
+            });
 
 
         }else{
@@ -485,11 +504,13 @@ public class FoundFriendActivity extends BaseActivity {
                                         }
                                     });
                                 }else{
+                                    hideProgressLoader();
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                 }
                             }
                         });
                     }else{
+                        hideProgressLoader();
                         Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                     }
                 }
@@ -564,22 +585,26 @@ public class FoundFriendActivity extends BaseActivity {
                                                         checkIfCurrentUserFollows();
 
                                                     }  else{
+                                                        hideProgressLoader();
                                                         Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                                     }
                                                 }
                                             });
                                         }else{
+                                            hideProgressLoader();
                                             Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                         }
                                     }
                                 });
 
                             }else{
+                                hideProgressLoader();
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                             }
                         }
                     });
                 } else{
+                    hideProgressLoader();
                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                 }
             }

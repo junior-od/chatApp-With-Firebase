@@ -88,17 +88,22 @@ public class DisplayUsersActivity extends BaseActivity {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild("followers")){
-
-                }else{
-                    followers_figure.setText("0");
-                }
-
-                if(dataSnapshot.hasChild("following")){
-
-                }else{
-                    following_figure.setText("0");
-                }
+                getFollowersCount();
+                getFollowingCount();
+//                if(dataSnapshot.hasChild("followers")){
+//
+//                }else{
+//                    //Toasty.error(getBaseContext(),"ye").show();
+//                    followers_figure.setText("0");
+//                }
+//
+//                Toasty.error(getBaseContext(),dataSnapshot.child("followers").exists()+"").show();
+//
+//                if(dataSnapshot.hasChild("following")){
+//
+//                }else{
+//                    following_figure.setText("0");
+//                }
 
             }
 
@@ -214,6 +219,8 @@ public class DisplayUsersActivity extends BaseActivity {
 
                         }
                     });
+                }else{
+                    followers_figure.setText("0");
                 }
             }
 
@@ -223,6 +230,8 @@ public class DisplayUsersActivity extends BaseActivity {
             }
         });
 
+
+
     }
 
     private void getFollowingCount(){
@@ -230,10 +239,15 @@ public class DisplayUsersActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    if (dataSnapshot.child("accepted").exists()){
-                        following_figure.setText(dataSnapshot.child("accepted").getChildrenCount()+"");
+                    if (dataSnapshot.child("accepted").exists()) {
+                        following_figure.setText(dataSnapshot.child("accepted").getChildrenCount() + "");
 
+                    }else{
+                        following_figure.setText("0");
                     }
+
+                }else{
+                    following_figure.setText("0");
                 }
             }
 

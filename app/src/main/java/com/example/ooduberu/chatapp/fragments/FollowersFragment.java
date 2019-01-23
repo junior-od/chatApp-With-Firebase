@@ -1,6 +1,7 @@
 package com.example.ooduberu.chatapp.fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -57,6 +58,7 @@ import es.dmoral.toasty.Toasty;
 public class FollowersFragment extends android.support.v4.app.Fragment {
     Unbinder unbinder;
     Listener listener;
+    Activity myActivity;
     Handler handler = new Handler();
 
     DatabaseReference rootDatabaseHolder;
@@ -87,6 +89,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        myActivity = getActivity();
         if (context instanceof Listener) {
             listener = (Listener) context;
         } else {
@@ -98,6 +101,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     public void onDetach() {
         super.onDetach();
         listener = null;
+        myActivity = null;
     }
 
 
@@ -298,9 +302,12 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
                 userTable.child(getRef(position).getKey()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                        if(myActivity == null){
+                            return;
+                        }
                         holder.setFullName(dataSnapshot.child("first_name").getValue().toString()+" "+dataSnapshot.child("last_name").getValue().toString());
                         holder.setUserName(dataSnapshot.child("user_name").getValue().toString());
-                        holder.setImage(dataSnapshot.child("image").getValue().toString(),getContext());
+                        holder.setImage(dataSnapshot.child("image").getValue().toString(),myActivity);
 
                         holder.follow_button.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -314,7 +321,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
                                     follow(getRef(position).getKey(),dataSnapshot.child("account_type").getValue().toString(),position);
 
                                 }else if (holder.follow_button.getText().toString().trim().equalsIgnoreCase("request sent")){
-                                    /cancelRequest(getRef(position).getKey(),position);
+                                    cancelRequest(getRef(position).getKey(),position);
                                 }else if( holder.follow_button.getText().toString().trim().equalsIgnoreCase("follow back")){
                                     followBack(getRef(position).getKey(),dataSnapshot.child("account_type").getValue().toString(),position);
                                 }else if (holder.follow_button.getText().toString().trim().equalsIgnoreCase("accept request")){
@@ -624,53 +631,57 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
                                                         checkIfCurrentUserFollows(id,position);
 
                                                     }  else{
+                                                        listener.hideProgressLoader();
                                                         Toasty.error(getContext(),task.getException().getMessage()).show();
                                                     }
                                                 }
                                             });
                                         }else{
+                                            listener.hideProgressLoader();
                                             Toasty.error(getContext(),task.getException().getMessage()).show();
                                         }
                                     }
                                 });
 
                             }else{
+                                listener.hideProgressLoader();
                                 Toasty.error(getContext(),task.getException().getMessage()).show();
                             }
                         }
                     });
                 } else{
+                    listener.hideProgressLoader();
                     Toasty.error(getContext(),task.getException().getMessage()).show();
                 }
             }
         });
 
     }
-//
-//    private void cancelRequest(final String id, final int position){
-//        listener.showProgressLoader();
-//        followersTableTemp.child(id).child("pending").child(AppPreference.getCurrentUserId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                listener.hideProgressLoader();
-//                if (task.isSuccessful()){
-//                    followingTable.child(AppPreference.getCurrentUserId()).child("pending").child(id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<Void> task) {
-//                            if (task.isSuccessful()){
-//                                checkIfLockedAccountFollowsYou(id,position);
-//                            } else{
-//                                Toasty.error(getContext(),task.getException().getMessage()).show();
-//                            }
-//                        }
-//                    });
-//
-//                }else{
-//                    Toasty.error(getContext(),task.getException().getMessage()).show();
-//                }
-//            }
-//        });
-//    }
+
+    private void cancelRequest(final String id, final int position){
+        listener.showProgressLoader();
+        followersTableTemp.child(id).child("pending").child(AppPreference.getCurrentUserId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                listener.hideProgressLoader();
+                if (task.isSuccessful()){
+                    followingTable.child(AppPreference.getCurrentUserId()).child("pending").child(id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()){
+                                checkIfLockedAccountFollowsYou(id,position);
+                            } else{
+                                Toasty.error(getContext(),task.getException().getMessage()).show();
+                            }
+                        }
+                    });
+
+                }else{
+                    Toasty.error(getContext(),task.getException().getMessage()).show();
+                }
+            }
+        });
+    }
 
     private void unfollow(final String id, final int position){
         listener.showProgressLoader();
@@ -763,7 +774,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     }
 
     private void checkIfLockedAccountFollowsYou(final String id, final int position){
-        followersTableTemp.child(AppPreference.getCurrentUserId()).addValueEventListener(new ValueEventListener() {
+        followersTableTemp.child(AppPreference.getCurrentUserId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.child("accepted").exists()){
@@ -892,7 +903,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             }
         });
     }
-//
+
     private void checkIfCurrentUserFollows(final String id, final int position){
         followersTableTemp.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -979,8 +990,6 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             }
         });
     }
-
-
 
     @Override
     public void onDestroyView() {
