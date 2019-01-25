@@ -5,6 +5,7 @@ package com.example.ooduberu.chatapp.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -52,6 +53,7 @@ public class FindFriendActivity extends BaseActivity {
     DatabaseReference usersTable;
     FirebaseRecyclerOptions<User> options;
     FirebaseRecyclerAdapter<User,UsersViewHolder> adapter;
+    Handler handler = new Handler();
 
 
     @BindView(R.id.toolbar) Toolbar search_nav_toolbar;
@@ -91,7 +93,7 @@ public class FindFriendActivity extends BaseActivity {
         searchView.setQueryHint("search...");
         searchView.setOnQueryTextListener(new android.widget.SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(final String s) {
                 if(!NetworkUtils.isNetworkAvailable(getBaseContext())){
                     Toasty.warning(getBaseContext(),"no internet connection").show();
                     return false;
@@ -101,15 +103,19 @@ public class FindFriendActivity extends BaseActivity {
                     temporary_loading_view.setVisibility(View.GONE);
                 }else{
                     temporary_loading_view.setVisibility(View.VISIBLE);
-                    findUser(s);
+                    handler.postDelayed(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    findUser(s);
+                                }
+                            }, 2000);
                 }
-
-
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(final String s) {
                 if(!NetworkUtils.isNetworkAvailable(getBaseContext())){
                     Toasty.warning(getBaseContext(),"no internet connection").show();
                     return false;
@@ -119,6 +125,12 @@ public class FindFriendActivity extends BaseActivity {
                     temporary_loading_view.setVisibility(View.GONE);
                 }else{
                     temporary_loading_view.setVisibility(View.VISIBLE);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            findUser(s);
+                        }
+                    },2000);
                     findUser(s);
                 }
 
@@ -127,8 +139,6 @@ public class FindFriendActivity extends BaseActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
-
-
 
     private void findUser(String s){
         //query the database to find the user

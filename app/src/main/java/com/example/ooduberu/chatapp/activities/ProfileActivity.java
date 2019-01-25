@@ -84,6 +84,7 @@ public class ProfileActivity extends BaseActivity {
     String headerImage;
     String profile_image;
     String fullName;
+    String userName;
 
     private static final String SAMPLE_CROPPED_IMAGE_NAME = "CropImage";
     private static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 1234;
@@ -124,6 +125,7 @@ public class ProfileActivity extends BaseActivity {
                 fullName = dataSnapshot.child("first_name").getValue().toString() + " " + dataSnapshot.child("last_name").getValue().toString();
                 headerImage = dataSnapshot.child("header_image").getValue().toString();
                 profile_image = dataSnapshot.child("image").getValue().toString();
+                userName = dataSnapshot.child("user_name").getValue().toString();
                 //to display the  header image from firebase
                 if(headerImage.equals("default")){
                     user_header_image.setImageResource(R.drawable.default_header_background);
@@ -171,17 +173,19 @@ public class ProfileActivity extends BaseActivity {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild("followers")){
-
-                }else{
-                    followers_figure.setText("0");
-                }
-
-                if(dataSnapshot.hasChild("following")){
-
-                }else{
-                    following_figure.setText("0");
-                }
+//                if(dataSnapshot.hasChild("followers")){
+//
+//                }else{
+//                    followers_figure.setText("0");
+//                }
+//
+//                if(dataSnapshot.hasChild("following")){
+//
+//                }else{
+//                    following_figure.setText("0");
+//                }
+                fetchFollowing();
+                fetchFollowers();
 
             }
 
@@ -208,6 +212,30 @@ public class ProfileActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @OnClick(R.id.view_followers)
+    public void viewUserFollowers(){
+//        fetchFollowersAndFollowingData("get_followers_details",AppPreference.getCurrentUserId());
+        Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
+        intent.putExtra("type","followers");
+        intent.putExtra("userName",userName);
+        intent.putExtra("foundUserId",AppPreference.getCurrentUserId());
+//        ActivityOptionsCompat options = ActivityOptionsCompat.
+//                makeSceneTransitionAnimation(this, user_name,  "username");
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.view_following)
+    public void viewUserFollowing(){
+        Intent intent = new Intent(getBaseContext(),DisplayUsersActivity.class);
+        intent.putExtra("type","following");
+        intent.putExtra("userName",userName);
+        intent.putExtra("foundUserId",AppPreference.getCurrentUserId());
+//        ActivityOptionsCompat options = ActivityOptionsCompat.
+//                makeSceneTransitionAnimation(this, user_name,  "username");
+        startActivity(intent);
+    }
+
 
     private void fetchFollowers(){
         followersTable.child(uId).addValueEventListener(new ValueEventListener() {

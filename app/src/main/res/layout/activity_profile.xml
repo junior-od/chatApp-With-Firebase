@@ -89,6 +89,7 @@
                 />
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/view_followers"
             android:layout_weight="1"
             android:orientation="vertical"
             android:layout_width="0dp"
@@ -110,6 +111,7 @@
                 />
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/view_following"
             android:layout_weight="1"
             android:orientation="vertical"
             android:layout_width="0dp"

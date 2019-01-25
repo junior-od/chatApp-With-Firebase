@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -61,19 +62,19 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     Activity myActivity;
     Handler handler = new Handler();
 
-    DatabaseReference rootDatabaseHolder;
     DatabaseReference userTable;
     DatabaseReference followersTable;
     DatabaseReference followersTableTemp;
     DatabaseReference followingTable;
 
     Query query;
-
     FirebaseRecyclerOptions<FollowBody> options;
     FirebaseRecyclerAdapter<FollowBody,FollowersViewHolder> adapter;
 
     @BindView(R.id.find_user_searchview) SearchView find_user_searchview;
     @BindView(R.id.display_users_recycler_view) RecyclerView display_users_recycler_view;
+    @BindView(R.id.refresh_follower_list_layout) FrameLayout refresh_follower_list_layout;
+    @BindView(R.id.no_result_found_layout) FrameLayout no_result_found_layout;
 
     ArrayList<String> followingKeys = new ArrayList<>();
     ArrayList<String> acceptRequestKeys = new ArrayList<>();
@@ -104,7 +105,6 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
         myActivity = null;
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -134,10 +134,15 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
         refreshList();
 
-
         display_users_recycler_view.setLayoutManager(new LinearLayoutManager(getContext()));
         display_users_recycler_view.setHasFixedSize(true);
-        findUser("");
+        refresh_follower_list_layout.setVisibility(View.VISIBLE);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                findUser("");
+            }
+        },5000);
 
         find_user_searchview.onActionViewExpanded();
         find_user_searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -145,14 +150,16 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             public boolean onQueryTextSubmit(String s) {
 
                 return false;
-
-
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
-                findUser(s);
-
+            public boolean onQueryTextChange(final String s) {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        findUser(s);
+                    }
+                },3000);
                 return false;
             }
         });
@@ -250,6 +257,18 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     public void onResume() {
         super.onResume();
         if(adapter != null){
+            refresh_follower_list_layout.setVisibility(View.VISIBLE);
+            refreshList();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                    if(myActivity != null){
+                        refresh_follower_list_layout.setVisibility(View.GONE);
+                    }
+
+                }
+            },5000);
             adapter.startListening();
         }
     }
@@ -257,15 +276,17 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
     private void findUser(String s){
         if(TextUtils.isEmpty(s)){
             //fetch all followers
-            query = followersTable.orderByChild("user_name");
+            query = userTable.orderByChild("user_name");
         }else{
             //fetch for currently searched follower
-            query = followersTable.orderByChild("user_name").startAt(s).endAt(s + "\uf8ff");
+            query = userTable.orderByChild("user_name").startAt(s).endAt(s + "\uf8ff");
         }
+
+        //indexed query takes in query of all the keys to be found in the database ref to make searching realtime
 
         options =
                 new FirebaseRecyclerOptions.Builder<FollowBody>()
-                        .setQuery(query, FollowBody.class)
+                        .setIndexedQuery(query,followersTable,FollowBody.class)
                         .build();
 
         adapter = new FirebaseRecyclerAdapter<FollowBody, FollowersViewHolder>(options) {
@@ -356,6 +377,17 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             public void onDataChanged() {
                 super.onDataChanged();
                 //todo stuffs
+                if(adapter.getItemCount() == 0){
+                    display_users_recycler_view.setVisibility(View.GONE);
+                    no_result_found_layout.setVisibility(View.VISIBLE);
+                    refresh_follower_list_layout.setVisibility(View.GONE);
+                }else{
+                    display_users_recycler_view.setVisibility(View.VISIBLE);
+                    no_result_found_layout.setVisibility(View.GONE);
+                    refresh_follower_list_layout.setVisibility(View.GONE);
+                }
+
+
             }
         };
         adapter.startListening();
@@ -513,8 +545,6 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
                 }
             });
         }
-
-
     }
 
     private void followBack(final String id, String accountType, final int position){
