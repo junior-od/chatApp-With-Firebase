@@ -20,10 +20,11 @@
             android:layout_width="match_parent"
             android:animationCache="true"
             android:animateLayoutChanges="true"
-            android:background="@color/colorPrimary"
+            app:tabGravity="fill"
+            app:tabMode="fixed"
             app:tabTextColor="#fff"
             app:tabSelectedTextColor="#c3c0d2"
-            app:tabIndicatorColor="#fff"
+            app:tabIndicatorColor="@color/white"
             >
 
 

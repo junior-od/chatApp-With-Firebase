@@ -57,7 +57,7 @@ public class FindFriendActivity extends BaseActivity {
 
 
     @BindView(R.id.toolbar) Toolbar search_nav_toolbar;
-    @BindView(R.id.temporary_loading_view) ConstraintLayout temporary_loading_view;
+    @BindView(R.id.temporary_loading_view) FrameLayout temporary_loading_view;
     @BindView(R.id.users_list) RecyclerView users_list;
     @BindView(R.id.no_result_found_layout) FrameLayout no_result_found_layout;
 

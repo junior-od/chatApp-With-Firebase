@@ -28,9 +28,10 @@
                         </option>
                         <option name="values">
                           <map>
+                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_chevron" />
-                            <entry key="sourceFile" value="C:\Users\Junior OD" />
+                            <entry key="outputName" value="ic_envelope" />
+                            <entry key="sourceFile" value="C:\Users\Junior OD\Downloads\envelope.svg" />
                           </map>
                         </option>
                       </PersistentState>
