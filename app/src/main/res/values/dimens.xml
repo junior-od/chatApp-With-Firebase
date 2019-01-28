@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_width">32dp</dimen>
+    <dimen name="icon_height">32dp</dimen>
+    <dimen name="defaulticon_width">20dp</dimen>
+    <dimen name="defaulticon_height">20dp</dimen>
+</resources>

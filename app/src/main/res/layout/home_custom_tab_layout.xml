@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -25,15 +25,12 @@
 
 
     <RelativeLayout
+        android:layout_marginLeft="5dp"
         android:id="@+id/relativelayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/circle_background"
-        app:layout_constraintBottom_toBottomOf="@id/image_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.10"
-        app:layout_constraintStart_toEndOf="@id/image_view"
-        app:layout_constraintTop_toTopOf="@id/image_view">
+       >
 
         <TextView
             android:id="@+id/figure"
