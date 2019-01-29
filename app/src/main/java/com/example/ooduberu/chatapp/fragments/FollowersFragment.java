@@ -277,6 +277,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
         if(TextUtils.isEmpty(s)){
             //fetch all followers
             query = userTable.orderByChild("user_name");
+            //todo query according to the time thr person followed the user
         }else{
             //fetch for currently searched follower
             query = userTable.orderByChild("user_name").startAt(s).endAt(s + "\uf8ff");
@@ -390,8 +391,11 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
 
             }
         };
-        adapter.startListening();
-        display_users_recycler_view.setAdapter(adapter);
+        if(adapter != null){
+            adapter.startListening();
+            display_users_recycler_view.setAdapter(adapter);
+        }
+
     }
 
     public static class FollowersViewHolder extends RecyclerView.ViewHolder{

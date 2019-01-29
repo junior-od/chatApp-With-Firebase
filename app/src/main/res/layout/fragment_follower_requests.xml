@@ -5,10 +5,24 @@
     android:layout_height="match_parent"
     tools:context=".fragments.FollowerRequestsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/followers_request_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        />
+
+    <FrameLayout
+        android:id="@+id/no_requests_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="no pending requests"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
 </FrameLayout>

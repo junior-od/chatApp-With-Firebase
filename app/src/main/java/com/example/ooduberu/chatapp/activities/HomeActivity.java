@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,6 +24,12 @@ import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.adapters.HomePagerAdapter;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,6 +43,8 @@ public class HomeActivity extends BaseActivity {
     HomePagerAdapter homePagerAdapter;
     TabLayout tabbed_layout;
     ViewPager viewPager;
+    DatabaseReference rootDatabaseHolder;
+    DatabaseReference followersTable;
 
     //for the tabs
     LinearLayout tab1;
@@ -72,6 +81,56 @@ public class HomeActivity extends BaseActivity {
 
         Toasty.success(getBaseContext(), AppPreference.getCurrentUserId()).show();
         Toasty.error(getBaseContext(),AppPreference.getCurrentUserName()).show();
+
+        rootDatabaseHolder = FirebaseDatabase.getInstance().getReference();
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+
+        rootDatabaseHolder.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                getPendingRequestCount();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                 getPendingRequestCount();
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         layoutParams = new LinearLayout.LayoutParams((int)getResources().getDimension(R.dimen.icon_width), (int)getResources().getDimension(R.dimen.icon_height));
         defaultlayoutParams = new LinearLayout.LayoutParams((int)getResources().getDimension(R.dimen.defaulticon_width), (int)getResources().getDimension(R.dimen.defaulticon_height));
 
@@ -275,6 +334,29 @@ public class HomeActivity extends BaseActivity {
         mAuth.signOut();
         startActivity(new Intent(getBaseContext(),LoginActivity.class));
         finish();
+    }
+
+    private void getPendingRequestCount(){
+        followersTable.child(AppPreference.getCurrentUserId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("pending").exists()){
+                    relativeLayout3.setVisibility(View.VISIBLE);
+                    friend_request_count_figure.setText(dataSnapshot.child("pending").getChildrenCount()+"");
+
+
+                }else{
+                    relativeLayout3.setVisibility(View.GONE);
+                    friend_request_count_figure.setText(dataSnapshot.child("pending").getChildrenCount()+"");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     @Override
