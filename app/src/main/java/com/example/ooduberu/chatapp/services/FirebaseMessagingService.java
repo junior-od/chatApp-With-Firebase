@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.activities.AccountSettingsActivity;
+import com.example.ooduberu.chatapp.activities.ProfileActivity;
 import com.example.ooduberu.chatapp.activities.SettingsActivity;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -27,6 +28,7 @@ import java.util.Random;
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = FirebaseMessagingService.class.getSimpleName();
+    Intent dataIntent;
 
     @Override
     public void onNewToken(String token) {
@@ -53,11 +55,10 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 //                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
 //                scheduleJob(bundle);
 //            } else {
-            //receiveDataMessage(remoteMessage);
+            receiveDataMessage(remoteMessage);
 //            }
         }
-
-        if (remoteMessage.getNotification() != null) {
+        else if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
             sendNotificationMessage(remoteMessage);
         }
@@ -158,9 +159,15 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         CharSequence adminChannelName = "channel name";
         String adminChannelDescription = "channel desc";
 
-        Intent intent = new Intent(this, AccountSettingsActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT);
+        if(remoteMessage.getData().get("type").equalsIgnoreCase("follower request")){
+            dataIntent = new Intent(this, AccountSettingsActivity.class);
+        }
+        else{
+            dataIntent = new Intent(this, ProfileActivity.class);
+        }
+
+        dataIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, dataIntent, PendingIntent.FLAG_ONE_SHOT);
 
 //      Intent save = new Intent(this, SaveService.class);
 //      save.putExtra(SaveService.NOTIFICATION_ID_EXTRA, notificationId);
