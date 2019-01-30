@@ -377,7 +377,7 @@ public class FollowersFragment extends android.support.v4.app.Fragment {
             @Override
             public void onDataChanged() {
                 super.onDataChanged();
-                //todo stuffs
+
                 if(adapter.getItemCount() == 0){
                     display_users_recycler_view.setVisibility(View.GONE);
                     no_result_found_layout.setVisibility(View.VISIBLE);
