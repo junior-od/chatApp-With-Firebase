@@ -1,5 +1,6 @@
 package com.example.ooduberu.chatapp.services;
 
+import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,14 +12,18 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.activities.AccountSettingsActivity;
+import com.example.ooduberu.chatapp.activities.HomeActivity;
+import com.example.ooduberu.chatapp.activities.LoginActivity;
 import com.example.ooduberu.chatapp.activities.ProfileActivity;
 import com.example.ooduberu.chatapp.activities.SettingsActivity;
+import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.InputStream;
@@ -159,14 +164,24 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         CharSequence adminChannelName = "channel name";
         String adminChannelDescription = "channel desc";
 
-        if(remoteMessage.getData().get("type").equalsIgnoreCase("follower request")){
-            dataIntent = new Intent(this, AccountSettingsActivity.class);
-        }
-        else{
-            dataIntent = new Intent(this, ProfileActivity.class);
-        }
+//       if(remoteMessage.getData().get("user_id").equals(AppPreference.getCurrentUserId())){
+            if(remoteMessage.getData().get("type").equalsIgnoreCase("follower request")){
+                dataIntent = new Intent(this, HomeActivity.class);
+                dataIntent.putExtra("position",2);
+                dataIntent.putExtra("userId",remoteMessage.getData().get("user_id"));
 
-        dataIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            }
+            else{
+                dataIntent = new Intent(this, ProfileActivity.class);
+            }
+      //  }
+//        else{
+//            dataIntent = new Intent(this, LoginActivity.class);
+//           // dataIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        }
+
+
+        //dataIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, dataIntent, PendingIntent.FLAG_ONE_SHOT);
 
 //      Intent save = new Intent(this, SaveService.class);

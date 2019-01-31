@@ -67,6 +67,9 @@ public class HomeActivity extends BaseActivity {
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
 
+    int pos = 0;
+    String verifyUserId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +82,18 @@ public class HomeActivity extends BaseActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        if(getIntent().getExtras() != null){
+            pos = getIntent().getExtras().getInt("position");
+            verifyUserId = getIntent().getExtras().getString("userId");
+            if(!verifyUserId.equals(AppPreference.getCurrentUserId())){
+                signOut();
+            }
+        }
+
         Toasty.success(getBaseContext(), AppPreference.getCurrentUserId()).show();
         Toasty.error(getBaseContext(),AppPreference.getCurrentUserName()).show();
+
+
 
         rootDatabaseHolder = FirebaseDatabase.getInstance().getReference();
         followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
@@ -112,25 +125,6 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         layoutParams = new LinearLayout.LayoutParams((int)getResources().getDimension(R.dimen.icon_width), (int)getResources().getDimension(R.dimen.icon_height));
         defaultlayoutParams = new LinearLayout.LayoutParams((int)getResources().getDimension(R.dimen.defaulticon_width), (int)getResources().getDimension(R.dimen.defaulticon_height));
 
@@ -141,7 +135,11 @@ public class HomeActivity extends BaseActivity {
         homePagerAdapter = new HomePagerAdapter(getSupportFragmentManager(),getBaseContext(),3, AppPreference.getCurrentUserId());
         viewPager.setAdapter(homePagerAdapter);
         tabbed_layout.setupWithViewPager(viewPager);
-        setUpTabs(0);
+
+        viewPager.setCurrentItem(pos);
+        setUpTabs(pos);
+
+
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -151,6 +149,7 @@ public class HomeActivity extends BaseActivity {
 
             @Override
             public void onPageSelected(int position) {
+                pos = position;
                 if(position == 0){
                     tab1.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                     tab1.setLayoutParams(ls);
@@ -221,6 +220,26 @@ public class HomeActivity extends BaseActivity {
 
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(getIntent().getExtras() != null){
+            pos = getIntent().getExtras().getInt("position");
+            verifyUserId = getIntent().getExtras().getString("userId");
+            Toasty.error(getBaseContext(),verifyUserId).show();
+            if(!verifyUserId.equals(AppPreference.getCurrentUserId())){
+                signOut();
+            }else{
+                viewPager.setCurrentItem(pos);
+            }
+
+
+        }else{
+            viewPager.setCurrentItem(pos);
+
+        }
+    }
 
     private void setUpTabs(int position){//todo int type
         tab1 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.home_custom_tab_layout, null);

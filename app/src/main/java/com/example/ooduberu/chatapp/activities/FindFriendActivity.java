@@ -202,9 +202,11 @@ public class FindFriendActivity extends BaseActivity {
              }
          };
 
-        adapter.startListening();
+         if(adapter != null){
+             adapter.startListening();
+             users_list.setAdapter(adapter);
+         }
 
-        users_list.setAdapter(adapter);
 
     }
 
