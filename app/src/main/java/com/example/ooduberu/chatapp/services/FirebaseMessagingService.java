@@ -170,6 +170,10 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
                 dataIntent.putExtra("position",2);
                 dataIntent.putExtra("userId",remoteMessage.getData().get("user_id"));
 
+            }else if(remoteMessage.getData().get("type").equalsIgnoreCase("new follower") || remoteMessage.getData().get("type").equalsIgnoreCase("follow request")){
+                dataIntent = new Intent(this, HomeActivity.class);
+                dataIntent.putExtra("position",3);
+                dataIntent.putExtra("userId",remoteMessage.getData().get("user_id"));
             }
             else{
                 dataIntent = new Intent(this, ProfileActivity.class);

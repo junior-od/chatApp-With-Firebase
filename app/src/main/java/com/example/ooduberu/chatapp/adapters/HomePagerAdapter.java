@@ -13,6 +13,7 @@ import com.example.ooduberu.chatapp.fragments.FollowerRequestsFragment;
 import com.example.ooduberu.chatapp.fragments.FollowersFragment;
 import com.example.ooduberu.chatapp.fragments.HomeFragment;
 import com.example.ooduberu.chatapp.fragments.MessagesFragment;
+import com.example.ooduberu.chatapp.fragments.UserActivitiesFragment;
 
 public class HomePagerAdapter extends FragmentPagerAdapter {
     Context context;
@@ -48,6 +49,11 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
 //                bundle.putString("foundUserId",user_id);
 //                follo.setArguments(bundle);
                 return followerRequestsFragment;
+
+            case 3:
+                UserActivitiesFragment userActivitiesFragment = new UserActivitiesFragment();
+
+                return userActivitiesFragment;
 
             default:
                 return null;

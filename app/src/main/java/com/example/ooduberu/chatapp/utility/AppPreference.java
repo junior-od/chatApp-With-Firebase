@@ -10,6 +10,8 @@ public class AppPreference {
      private static final String IS_FIRST_TIME_LAUNCH = "is_first_time_launch";
      private static final String CURRENT_USER_ID = "current_user_id";
      private static final String CURRENT_USERNAME = "current_user_name";
+     private static final String CHECK_PENDING_REQUEST_COUNT = "check_pending_request_count";
+     private static final String PENDING_REQUESTS_COUNT = "pending_requests_count";
 
 
     public static SharedPreferences setUpDefault(Context context) {
@@ -27,6 +29,29 @@ public class AppPreference {
 
     public static boolean isFirstTimeLaunch(){
         return sharedPreferences != null && sharedPreferences.getBoolean(IS_FIRST_TIME_LAUNCH,true);
+    }
+
+    public static void setCheckPendingRequestCount(boolean checkPendingRequestCount){
+        if(sharedPreferences != null){
+            sharedPreferences.edit().putBoolean(CHECK_PENDING_REQUEST_COUNT,checkPendingRequestCount).apply();
+        }
+    }
+
+    public static boolean IsPendingRequestCounted(){
+        return sharedPreferences != null && sharedPreferences.getBoolean(CHECK_PENDING_REQUEST_COUNT,false);
+    }
+
+    public static void setPendingRequestsCount(long count){
+        if(sharedPreferences != null){
+            sharedPreferences.edit().putLong(PENDING_REQUESTS_COUNT,count).apply();
+        }
+    }
+
+    public static long getPendingRequestsCount(){
+        if(sharedPreferences != null){
+            return sharedPreferences.getLong(PENDING_REQUESTS_COUNT,0);
+        }
+        return 0;
     }
 
     public static void setCurrentUserId(String userId){

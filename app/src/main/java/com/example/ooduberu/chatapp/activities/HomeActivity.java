@@ -50,16 +50,26 @@ public class HomeActivity extends BaseActivity {
     LinearLayout tab1;
     LinearLayout tab2;
     LinearLayout tab3;
+    LinearLayout tab4;
+
     RelativeLayout relativeLayout1;
     RelativeLayout relativeLayout2;
     RelativeLayout relativeLayout3;
+    RelativeLayout relativeLayout4;
 
     ImageView home_icon;
     ImageView messages_icon;
     ImageView friend_request_icon;
+    ImageView activity_icon;
+
     TextView home_count_figure;
     TextView messages_count_figure;
     TextView friend_request_count_figure;
+
+    ImageView home_dot;
+    ImageView messages_dot;
+    ImageView friend_request_dot;
+    ImageView activity_dot;
 
     LinearLayout.LayoutParams layoutParams;
     LinearLayout.LayoutParams defaultlayoutParams;
@@ -88,6 +98,7 @@ public class HomeActivity extends BaseActivity {
             if(!verifyUserId.equals(AppPreference.getCurrentUserId())){
                 signOut();
             }
+
         }
 
         Toasty.success(getBaseContext(), AppPreference.getCurrentUserId()).show();
@@ -132,13 +143,15 @@ public class HomeActivity extends BaseActivity {
 
         tabbed_layout = (TabLayout)findViewById(R.id.tabbed_layout);
         viewPager = (ViewPager)findViewById(R.id.view_pager);
-        homePagerAdapter = new HomePagerAdapter(getSupportFragmentManager(),getBaseContext(),3, AppPreference.getCurrentUserId());
+        homePagerAdapter = new HomePagerAdapter(getSupportFragmentManager(),getBaseContext(),4, AppPreference.getCurrentUserId());
         viewPager.setAdapter(homePagerAdapter);
         tabbed_layout.setupWithViewPager(viewPager);
 
         viewPager.setCurrentItem(pos);
         setUpTabs(pos);
-
+        if(pos == 2){
+            friend_request_dot.setVisibility(View.VISIBLE);
+        }
 
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -155,60 +168,120 @@ public class HomeActivity extends BaseActivity {
                     tab1.setLayoutParams(ls);
                     home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette));
                     home_icon.setLayoutParams(layoutParams);
+                    home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
                     relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
                     home_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
                     tab2.setBackgroundColor(getResources().getColor(R.color.white));
                     messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
                     messages_icon.setLayoutParams(defaultlayoutParams);
+                    messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     messages_count_figure.setTextColor(getResources().getColor(R.color.white));
 
                     tab3.setBackgroundColor(getResources().getColor(R.color.white));
                     friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
                     friend_request_icon.setLayoutParams(defaultlayoutParams);
+                    friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                    tab4.setBackgroundColor(getResources().getColor(R.color.white));
+                    activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+                    activity_icon.setLayoutParams(defaultlayoutParams);
+                    activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
 
                 }else if(position == 1){
                     tab2.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                     tab2.setLayoutParams(ls);
                     messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message));
                     messages_icon.setLayoutParams(layoutParams);
+                    messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
                     relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
                     messages_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
                     tab1.setBackgroundColor(getResources().getColor(R.color.white));
                     home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
                     home_icon.setLayoutParams(defaultlayoutParams);
+                    home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     home_count_figure.setTextColor(getResources().getColor(R.color.white));
 
                     tab3.setBackgroundColor(getResources().getColor(R.color.white));
                     friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
                     friend_request_icon.setLayoutParams(defaultlayoutParams);
+                    friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
 
-                }else{
+                    tab4.setBackgroundColor(getResources().getColor(R.color.white));
+                    activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+                    activity_icon.setLayoutParams(defaultlayoutParams);
+                    activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                }else if (position == 2){
                     tab3.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                     tab3.setLayoutParams(ls);
                     friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend));
                     friend_request_icon.setLayoutParams(layoutParams);
+                    friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
                     relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
                     friend_request_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
                     tab1.setBackgroundColor(getResources().getColor(R.color.white));
                     home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
                     home_icon.setLayoutParams(defaultlayoutParams);
+                    home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     home_count_figure.setTextColor(getResources().getColor(R.color.white));
 
                     tab2.setBackgroundColor(getResources().getColor(R.color.white));
                     messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
                     messages_icon.setLayoutParams(defaultlayoutParams);
+                    messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
                     relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
                     messages_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                    tab4.setBackgroundColor(getResources().getColor(R.color.white));
+                    activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+                    activity_icon.setLayoutParams(defaultlayoutParams);
+                    activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                }else{
+                    tab4.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    tab4.setLayoutParams(ls);
+                    activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite));
+                    activity_icon.setLayoutParams(layoutParams);
+                    activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
+                    relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
+                    // friend_request_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+                    tab1.setBackgroundColor(getResources().getColor(R.color.white));
+                    home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
+                    home_icon.setLayoutParams(defaultlayoutParams);
+                    home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    home_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                    tab2.setBackgroundColor(getResources().getColor(R.color.white));
+                    messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
+                    messages_icon.setLayoutParams(defaultlayoutParams);
+                    messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    messages_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+                    tab3.setBackgroundColor(getResources().getColor(R.color.white));
+                    friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
+                    friend_request_icon.setLayoutParams(defaultlayoutParams);
+                    friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+                    relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+                    friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
                 }
             }
 
@@ -217,6 +290,8 @@ public class HomeActivity extends BaseActivity {
 
             }
         });
+
+
 
     }
 
@@ -227,13 +302,15 @@ public class HomeActivity extends BaseActivity {
         if(getIntent().getExtras() != null){
             pos = getIntent().getExtras().getInt("position");
             verifyUserId = getIntent().getExtras().getString("userId");
-            Toasty.error(getBaseContext(),verifyUserId).show();
+//            Toasty.error(getBaseContext(),verifyUserId).show();
             if(!verifyUserId.equals(AppPreference.getCurrentUserId())){
                 signOut();
             }else{
+                if(pos == 2){
+                    friend_request_dot.setVisibility(View.VISIBLE);
+                }
                 viewPager.setCurrentItem(pos);
             }
-
 
         }else{
             viewPager.setCurrentItem(pos);
@@ -244,81 +321,151 @@ public class HomeActivity extends BaseActivity {
     private void setUpTabs(int position){//todo int type
         tab1 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.home_custom_tab_layout, null);
         home_icon = (ImageView)tab1.findViewById(R.id.image_view);
+        home_dot = (ImageView)tab1.findViewById(R.id.dot);
         relativeLayout1 = (RelativeLayout)tab1.findViewById(R.id.relativelayout);
         home_count_figure = (TextView)tab1.findViewById(R.id.figure);
         tabbed_layout.getTabAt(0).setCustomView(tab1);
 
         tab2 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.home_custom_tab_layout, null);
         messages_icon = (ImageView)tab2.findViewById(R.id.image_view);
+        messages_dot = (ImageView)tab2.findViewById(R.id.dot);
         relativeLayout2 = (RelativeLayout)tab2.findViewById(R.id.relativelayout);
         messages_count_figure = (TextView)tab2.findViewById(R.id.figure);
         tabbed_layout.getTabAt(1).setCustomView(tab2);
 
         tab3 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.home_custom_tab_layout, null);
         friend_request_icon = (ImageView)tab3.findViewById(R.id.image_view);
+        friend_request_dot = (ImageView)tab3.findViewById(R.id.dot);
         relativeLayout3 = (RelativeLayout)tab3.findViewById(R.id.relativelayout);
         friend_request_count_figure = (TextView)tab3.findViewById(R.id.figure);
         tabbed_layout.getTabAt(2).setCustomView(tab3);
+
+        tab4 = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.home_custom_tab_layout, null);
+        activity_icon = (ImageView)tab4.findViewById(R.id.image_view);
+        activity_dot = (ImageView)tab4.findViewById(R.id.dot);
+        relativeLayout4 = (RelativeLayout)tab4.findViewById(R.id.relativelayout);
+        //friend_request_count_figure = (TextView)tab4.findViewById(R.id.figure);
+        tabbed_layout.getTabAt(3).setCustomView(tab4);
 
         if(position == 0){
             tab1.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             tab1.setLayoutParams(ls);
             home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette));
             home_icon.setLayoutParams(layoutParams);
+            home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
             relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
             home_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
             tab2.setBackgroundColor(getResources().getColor(R.color.white));
             messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
             messages_icon.setLayoutParams(defaultlayoutParams);
+            messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             messages_count_figure.setTextColor(getResources().getColor(R.color.white));
 
             tab3.setBackgroundColor(getResources().getColor(R.color.white));
             friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
             friend_request_icon.setLayoutParams(defaultlayoutParams);
+            friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+            tab4.setBackgroundColor(getResources().getColor(R.color.white));
+            activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+            activity_icon.setLayoutParams(defaultlayoutParams);
+            activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
 
         }else if(position == 1){
             tab2.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             tab2.setLayoutParams(ls);
             messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message));
             messages_icon.setLayoutParams(layoutParams);
+            messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
             relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
             messages_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
             tab1.setBackgroundColor(getResources().getColor(R.color.white));
             home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
             home_icon.setLayoutParams(defaultlayoutParams);
+            home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             home_count_figure.setTextColor(getResources().getColor(R.color.white));
 
             tab3.setBackgroundColor(getResources().getColor(R.color.white));
             friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
             friend_request_icon.setLayoutParams(defaultlayoutParams);
+            friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
 
-        }else{
+            tab4.setBackgroundColor(getResources().getColor(R.color.white));
+            activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+            activity_icon.setLayoutParams(defaultlayoutParams);
+            activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+        }else if (position == 2){
             tab3.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             tab3.setLayoutParams(ls);
             friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend));
             friend_request_icon.setLayoutParams(layoutParams);
+            friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
             relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
             friend_request_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
 
             tab1.setBackgroundColor(getResources().getColor(R.color.white));
             home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
             home_icon.setLayoutParams(defaultlayoutParams);
+            home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             home_count_figure.setTextColor(getResources().getColor(R.color.white));
 
             tab2.setBackgroundColor(getResources().getColor(R.color.white));
             messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
             messages_icon.setLayoutParams(defaultlayoutParams);
+            messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
             relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
             messages_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+            tab4.setBackgroundColor(getResources().getColor(R.color.white));
+            activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black));
+            activity_icon.setLayoutParams(defaultlayoutParams);
+            activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            //friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+        }else{
+            tab4.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            tab4.setLayoutParams(ls);
+            activity_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite));
+            activity_icon.setLayoutParams(layoutParams);
+            activity_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot));
+            relativeLayout4.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background));
+           // friend_request_count_figure.setTextColor(getResources().getColor(R.color.colorPrimary));
+
+            tab1.setBackgroundColor(getResources().getColor(R.color.white));
+            home_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_icon_silhouette_black));
+            home_icon.setLayoutParams(defaultlayoutParams);
+            home_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout1.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            home_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+            tab2.setBackgroundColor(getResources().getColor(R.color.white));
+            messages_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_message_black));
+            messages_icon.setLayoutParams(defaultlayoutParams);
+            messages_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout2.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            messages_count_figure.setTextColor(getResources().getColor(R.color.white));
+
+            tab3.setBackgroundColor(getResources().getColor(R.color.white));
+            friend_request_icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_friend_black));
+            friend_request_icon.setLayoutParams(defaultlayoutParams);
+            friend_request_dot.setImageDrawable(getResources().getDrawable(R.drawable.ic_dot_black));
+            relativeLayout3.setBackgroundDrawable(getResources().getDrawable(R.drawable.circle_background_black));
+            friend_request_count_figure.setTextColor(getResources().getColor(R.color.white));
         }
     }
 
@@ -351,6 +498,7 @@ public class HomeActivity extends BaseActivity {
     @OnClick(R.id.sign_out)
     public void signOut(){
         mAuth.signOut();
+        AppPreference.setCheckPendingRequestCount(false);
         startActivity(new Intent(getBaseContext(),LoginActivity.class));
         finish();
     }
@@ -362,12 +510,23 @@ public class HomeActivity extends BaseActivity {
                 if(dataSnapshot.child("pending").exists()){
                     relativeLayout3.setVisibility(View.VISIBLE);
                     friend_request_count_figure.setText(dataSnapshot.child("pending").getChildrenCount()+"");
+                    if(AppPreference.IsPendingRequestCounted()){
+                        if(dataSnapshot.child("pending").getChildrenCount() > AppPreference.getPendingRequestsCount()){
+                            friend_request_dot.setVisibility(View.VISIBLE);
+                            AppPreference.setPendingRequestsCount(dataSnapshot.child("pending").getChildrenCount());
+                        }
+
+                    }
 
 
                 }else{
+                    AppPreference.setPendingRequestsCount(0);
+                    friend_request_dot.setVisibility(View.GONE);
                     relativeLayout3.setVisibility(View.GONE);
                     friend_request_count_figure.setText(dataSnapshot.child("pending").getChildrenCount()+"");
                 }
+                AppPreference.setCheckPendingRequestCount(true);
+
             }
 
             @Override
