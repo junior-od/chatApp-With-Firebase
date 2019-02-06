@@ -10,6 +10,7 @@ import com.example.ooduberu.chatapp.model.ActivitiesBody;
 import com.example.ooduberu.chatapp.model.FollowNotificationBody;
 import com.example.ooduberu.chatapp.model.User;
 import com.example.ooduberu.chatapp.utility.AppPreference;
+import com.example.ooduberu.chatapp.utility.TimeDateUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -18,7 +19,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
+import es.dmoral.toasty.Toasty;
 
 public class ChatAppNotificationService extends IntentService {
     private static final String TAG = ChatAppNotificationService.class.getSimpleName();
@@ -99,7 +105,17 @@ public class ChatAppNotificationService extends IntentService {
                     activitiesBody.setUser_id(user_id);
                     activitiesBody.setType("new follower");
                     activitiesBody.setPost_id("");
-                    activitiesBody.setTime("");
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+                    try {
+                        Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                        long timeInMilliseconds = mDate.getTime();
+                      //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                        activitiesBody.setTime(""+timeInMilliseconds);
+                        //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
                     activitiesBody.setMessage("started following you");
                     activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -135,7 +151,16 @@ public class ChatAppNotificationService extends IntentService {
                     activitiesBody.setUser_id(user_id);
                     activitiesBody.setType("follower request");
                     activitiesBody.setPost_id("");
-                    activitiesBody.setTime("");
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+                    try {
+                        Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                        long timeInMilliseconds = mDate.getTime();
+                        //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                        activitiesBody.setTime(""+timeInMilliseconds);
+                        //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     activitiesBody.setMessage("requested to follow you");
                     activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -172,7 +197,16 @@ public class ChatAppNotificationService extends IntentService {
                     activitiesBody.setUser_id(user_id);
                     activitiesBody.setType("new follower");
                     activitiesBody.setPost_id("");
-                    activitiesBody.setTime("");
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+                    try {
+                        Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                        long timeInMilliseconds = mDate.getTime();
+                        //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                        activitiesBody.setTime(""+timeInMilliseconds);
+                        //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     activitiesBody.setMessage("started following you");
 
                     activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {

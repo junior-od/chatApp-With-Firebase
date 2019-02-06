@@ -12,9 +12,9 @@
         android:id="@+id/user_image"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:transitionName="profile"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +43,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="erwrweerwrwrewewrwrwrewew"
+        android:text="hgjhjhjhghjghgjgjhjhghwrewew"
         android:textColor="@color/darkGrey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/post_image"
@@ -57,9 +57,20 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="15dp"
+        android:src="@color/darkGrey"
         app:layout_constraintBottom_toBottomOf="@+id/user_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/user_image" />
 
-
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="15dp"
+        android:text="wrwer"
+        android:textColor="@color/darkGrey"
+        app:layout_constraintBottom_toBottomOf="@+id/message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/post_image" />
 </android.support.constraint.ConstraintLayout>

@@ -9,7 +9,6 @@ import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,11 +21,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.ooduberu.chatapp.R;
-import com.example.ooduberu.chatapp.activities.FindFriendActivity;
 import com.example.ooduberu.chatapp.activities.FoundFriendActivity;
 import com.example.ooduberu.chatapp.activities.ProfileActivity;
 import com.example.ooduberu.chatapp.model.ActivitiesBody;
-import com.example.ooduberu.chatapp.model.User;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.example.ooduberu.chatapp.utility.TimeDateUtils;
@@ -38,6 +35,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
+
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -144,16 +148,21 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
 
                 if(model.getType().equalsIgnoreCase("new follower") || model.getType().equalsIgnoreCase("follower request")){
                     holder.post_image.setVisibility(View.GONE);
-//                    holder.userView.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            viewUserProfile(model.getUser_id(),holder.user_image);
-//                        }
-//                    });
-                    Toasty.error(getContext(), TimeDateUtils.getCurrentUTCTimestamp()).show();
+                    holder.userView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            viewUserProfile(model.getUser_id(),holder.user_image);
+
+
+                        }
+                    });
+
                 }
 
                 holder.setMessage(model.getMessage());
+                if(!model.getTime().isEmpty()){//todo remove later
+                    holder.setTime(TimeDateUtils.getTimeAgo(Long.parseLong(model.getTime())));
+                }
 
                 userTable.child(model.getUser_id()).addValueEventListener(new ValueEventListener() {
                     @Override
@@ -224,6 +233,7 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
         View userView;//creates a view that will be used by the firebase adapter
         TextView userName;
         TextView  message;
+        TextView time;
         CircleImageView user_image;
         ImageView post_image;
 
@@ -246,6 +256,11 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
         public void setMessage(String msg){
              message= (TextView)userView.findViewById(R.id.message);
              message.setText(msg);
+        }
+
+        public void setTime(String t){
+            time = (TextView)userView.findViewById(R.id.time);
+            time.setText(t);
         }
 
         //sets the image of the user

@@ -1,5 +1,20 @@
 package com.example.ooduberu.chatapp.utility;
 
+import android.content.Context;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
+
+import com.example.ooduberu.chatapp.ChatApplication;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class TimeDateUtils {
     private static final int SECOND = 1000;
     private static final int MINUTE = 60 * SECOND;
@@ -27,9 +42,9 @@ public class TimeDateUtils {
         return System.currentTimeMillis();
     }
 
-    public static String getCurrentUTCTimestamp() {
-        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss a Z", Locale.US);
-        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+    public static String getCurrentGMTTimestamp() {
+        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
+        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dateFormatGmt.format(new Date());
     }
 
@@ -114,7 +129,7 @@ public class TimeDateUtils {
     }
 
     public static String formatShortDate(Date date) {
-        Context context = MoneyBagApp.getInstance();
+        Context context = ChatApplication.getInstance();
 
         StringBuilder sb = new StringBuilder();
         Formatter formatter = new Formatter(sb);

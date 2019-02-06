@@ -34,7 +34,10 @@ public class ProgressDialogController {
     }
 
     public void finishProgress() {
-        mProgressFragment.dismiss();
+        if(mProgressFragment != null){
+            mProgressFragment.dismiss();
+        }
+        //mProgressFragment.dismiss();
     }
 
     private void clearStack(){
