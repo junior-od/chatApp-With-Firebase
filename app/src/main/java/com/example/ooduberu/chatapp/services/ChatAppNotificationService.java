@@ -6,8 +6,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.ooduberu.chatapp.model.ActivitiesBody;
 import com.example.ooduberu.chatapp.model.FollowNotificationBody;
 import com.example.ooduberu.chatapp.model.User;
+import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +33,8 @@ public class ChatAppNotificationService extends IntentService {
     DatabaseReference followNotifications;
     DatabaseReference followRequestNotifications;
     DatabaseReference acceptFollowRequestNotifications;
+
+    DatabaseReference activities;
 
 
     String action_type;
@@ -76,7 +80,8 @@ public class ChatAppNotificationService extends IntentService {
 
     }
 
-    private void followUnlockedAccount(String user_id, String receiver_id){
+    private void followUnlockedAccount(final String user_id, final String receiver_id){
+        activities = FirebaseDatabase.getInstance().getReference().child("activities");
         followNotifications = FirebaseDatabase.getInstance().getReference().child("followNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
@@ -85,7 +90,28 @@ public class ChatAppNotificationService extends IntentService {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Log.i(TAG,"sent sucessfully");
+//                    String user_id;
+//                    String post_id;
+//                    String type;
+//                    String message;
+//                    String time;
+                    ActivitiesBody activitiesBody = new ActivitiesBody();
+                    activitiesBody.setUser_id(user_id);
+                    activitiesBody.setType("new follower");
+                    activitiesBody.setPost_id("");
+                    activitiesBody.setTime("");
+                    activitiesBody.setMessage("started following you");
+                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"sent sucessfully");
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+                            }
+                        }
+                    });
+
                 }else{
                     Log.i(TAG,task.getException().getMessage());
 
@@ -94,7 +120,8 @@ public class ChatAppNotificationService extends IntentService {
         });
     }
 
-    private void followLockedAccount(String user_id, String receiver_id){
+    private void followLockedAccount(final String user_id, final String receiver_id){
+        activities = FirebaseDatabase.getInstance().getReference().child("activities");
         followRequestNotifications = FirebaseDatabase.getInstance().getReference().child("followRequestNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
@@ -102,16 +129,36 @@ public class ChatAppNotificationService extends IntentService {
         followRequestNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+
                 if(task.isSuccessful()){
-                    Log.i(TAG,"sent sucessful");
+                    ActivitiesBody activitiesBody = new ActivitiesBody();
+                    activitiesBody.setUser_id(user_id);
+                    activitiesBody.setType("follower request");
+                    activitiesBody.setPost_id("");
+                    activitiesBody.setTime("");
+                    activitiesBody.setMessage("requested to follow you");
+                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"sent sucessful");
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+                            }
+                        }
+                    });
+
                 }else{
                     Log.i(TAG,task.getException().getMessage());
+
                 }
+
             }
         });
     }
 
-    private void acceptFollowRequest(String user_id,String receiver_id){
+    private void acceptFollowRequest(final String user_id, final String receiver_id){
+        activities = FirebaseDatabase.getInstance().getReference().child("activities");
         acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
@@ -119,11 +166,32 @@ public class ChatAppNotificationService extends IntentService {
         acceptFollowRequestNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Log.i(TAG,"sent message sucessful");
+
+                if (task.isSuccessful()){
+                    ActivitiesBody activitiesBody = new ActivitiesBody();
+                    activitiesBody.setUser_id(user_id);
+                    activitiesBody.setType("new follower");
+                    activitiesBody.setPost_id("");
+                    activitiesBody.setTime("");
+                    activitiesBody.setMessage("started following you");
+
+                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"sent message sucessful");
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+                            }
+                        }
+                    });
                 }else{
                     Log.i(TAG,task.getException().getMessage());
+
                 }
+
+
+
             }
         });
 

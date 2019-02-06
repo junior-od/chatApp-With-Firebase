@@ -151,6 +151,8 @@ public class HomeActivity extends BaseActivity {
         setUpTabs(pos);
         if(pos == 2){
             friend_request_dot.setVisibility(View.VISIBLE);
+        }else if(pos == 3){
+            activity_dot.setVisibility(View.VISIBLE);
         }
 
 
@@ -308,6 +310,8 @@ public class HomeActivity extends BaseActivity {
             }else{
                 if(pos == 2){
                     friend_request_dot.setVisibility(View.VISIBLE);
+                }else if (pos == 3){
+                    activity_dot.setVisibility(View.VISIBLE);
                 }
                 viewPager.setCurrentItem(pos);
             }
@@ -499,7 +503,9 @@ public class HomeActivity extends BaseActivity {
     public void signOut(){
         mAuth.signOut();
         AppPreference.setCheckPendingRequestCount(false);
-        startActivity(new Intent(getBaseContext(),LoginActivity.class));
+        Intent intent = new Intent(getBaseContext(),LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
     }
 

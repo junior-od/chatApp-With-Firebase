@@ -5,10 +5,26 @@
     android:layout_height="match_parent"
     tools:context=".fragments.UserActivitiesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/activity_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        />
+
+    <FrameLayout
+        android:id="@+id/no_activity_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="no activity yet"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
 
 </FrameLayout>
