@@ -21,6 +21,7 @@ import com.example.ooduberu.chatapp.R;
 import com.example.ooduberu.chatapp.model.FollowBody;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
+import com.example.ooduberu.chatapp.utility.TimeDateUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
@@ -29,6 +30,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +47,7 @@ public class FoundFriendActivity extends BaseActivity {
     DatabaseReference userTable;
     DatabaseReference followersTable;
     DatabaseReference followingTable;
+    DatabaseReference acceptFollowRequestNotifications;
 
 
     @BindView(R.id.app_navigate) Toolbar mToolbar;
@@ -59,6 +65,8 @@ public class FoundFriendActivity extends BaseActivity {
 
     String uId;
     String otherUsersId;
+    String followActivityKey;
+    String removeAcceptActivityKey;
     String headerImage;
     String profile_image;
     String fullName;
@@ -162,6 +170,7 @@ public class FoundFriendActivity extends BaseActivity {
         followersTable.keepSynced(true);
         followingTable = FirebaseDatabase.getInstance().getReference().child("following");
         followingTable.keepSynced(true);
+        acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
 
         //new  code testing
         rootDatabaseHolder.addChildEventListener(new ChildEventListener() {
@@ -272,18 +281,20 @@ public class FoundFriendActivity extends BaseActivity {
                             }
                         });
                         if(dataSnapshot.child("accepted").child(uId).exists()){
-                            if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
-                                follow_button_text = "following";
-                                follow_button.setText(follow_button_text);
-                                follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
-                                follow_button.setTextColor(getResources().getColor(R.color.customBlue));
-                                follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    follow_button.setCompoundDrawableTintList(myList);
+                            if(dataSnapshot.child("accepted").child(uId).child("request_type").exists()){
+                                if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
+                                    follow_button_text = "following";
+                                    follow_button.setText(follow_button_text);
+                                    follow_button.setBackgroundColor(Color.parseColor("#ffffff"));
+                                    follow_button.setTextColor(getResources().getColor(R.color.customBlue));
+                                    follow_button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check,0,0,0);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        follow_button.setCompoundDrawableTintList(myList);
+                                    }
+                                }else if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+                                    follow_button_text = "accept request";
+                                    follow_button.setText(follow_button_text);
                                 }
-                            }else if (dataSnapshot.child("accepted").child(uId).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
-                                follow_button_text = "accept request";
-                                follow_button.setText(follow_button_text);
                             }
 
                         }
@@ -402,7 +413,17 @@ public class FoundFriendActivity extends BaseActivity {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
-            followBody.setUser_name(AppPreference.getCurrentUserName());
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -420,7 +441,7 @@ public class FoundFriendActivity extends BaseActivity {
                                             if (task.isSuccessful()){
                                                 fetchFollowers();
                                                 Toasty.success(getBaseContext(),"now following").show();
-                                                sendNotification("follow_unlocked",uId,otherUsersId);
+                                                sendNotification("follow_unlocked",uId,otherUsersId,"");
 
                                             }else{
                                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -444,12 +465,24 @@ public class FoundFriendActivity extends BaseActivity {
         }else{
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("pending");
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             followersTable.child(otherUsersId).child("pending").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
                         FollowBody fb = new FollowBody();
                         fb.setRequest_type("accept request");
+
                         followingTable.child(uId).child("pending").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -457,7 +490,7 @@ public class FoundFriendActivity extends BaseActivity {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
                                     Toasty.success(getBaseContext(),"request sent").show();
-                                    sendNotification("follow_locked",uId,otherUsersId);
+                                    sendNotification("follow_locked",uId,otherUsersId,"");
                                 }
                                 else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -481,7 +514,17 @@ public class FoundFriendActivity extends BaseActivity {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
-            followBody.setUser_name(AppPreference.getCurrentUserName());
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             followersTable.child(otherUsersId).child("accepted").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -497,7 +540,7 @@ public class FoundFriendActivity extends BaseActivity {
                                             if(task.isSuccessful()){
                                                 fetchFollowers();
                                                 Toasty.success(getBaseContext(),"now following").show();
-                                                sendNotification("follow_unlocked",uId,otherUsersId);
+                                                sendNotification("follow_unlocked",uId,otherUsersId,"");
                                             }else{
                                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
                                             }
@@ -518,6 +561,17 @@ public class FoundFriendActivity extends BaseActivity {
         }else{
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("pending");
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             followersTable.child(otherUsersId).child("pending").child(uId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -562,9 +616,33 @@ public class FoundFriendActivity extends BaseActivity {
 
     private void acceptRequest(){
         showProgressLoader();
+        followersTable.child(uId).child("pending").child(otherUsersId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         final FollowBody followBody = new FollowBody();
         followBody.setRequest_type("accepted");
-        followBody.setUser_name(AppPreference.getCurrentUserName());
+        followBody.setActivity_id("");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        try {
+            Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+            long timeInMilliseconds = mDate.getTime();
+            //  System.out.println("Date in milli :: " + timeInMilliseconds);
+            followBody.setTime_followed(-timeInMilliseconds);
+            //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         followersTable.child(uId).child("accepted").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -614,6 +692,21 @@ public class FoundFriendActivity extends BaseActivity {
 
     private void cancelRequest(){
         showProgressLoader();
+        followersTable.child(otherUsersId).child("pending").child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         followersTable.child(otherUsersId).child("pending").child(uId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -639,6 +732,35 @@ public class FoundFriendActivity extends BaseActivity {
 
     private void unfollow(){
         showProgressLoader();
+        acceptFollowRequestNotifications.child(AppPreference.getCurrentUserId()).child(otherUsersId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    removeAcceptActivityKey = ds.child("activity_id").getValue().toString();
+                    return;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        followersTable.child(otherUsersId).child("accepted").child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         followersTable.child(otherUsersId).child("accepted").child(uId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -680,8 +802,8 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
-                                sendNotification("cancel_accept_request",otherUsersId,uId);
-                                sendNotification("cancel_follow_notification",uId,otherUsersId);
+                                sendNotification("cancel_accept_request",otherUsersId,uId,removeAcceptActivityKey);
+                                sendNotification("cancel_follow_notification",uId,otherUsersId,followActivityKey);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -699,8 +821,8 @@ public class FoundFriendActivity extends BaseActivity {
                                 fetchFollowers();
                                 fetchFollowing();
                                 setDefaultButtonText();
-                                sendNotification("cancel_accept_request",otherUsersId,uId);
-                                sendNotification("cancel_follow_notification",uId,otherUsersId);
+                                sendNotification("cancel_accept_request",otherUsersId,uId,removeAcceptActivityKey);
+                                sendNotification("cancel_follow_notification",uId,otherUsersId,followActivityKey);
                                 Toasty.success(getBaseContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -739,7 +861,7 @@ public class FoundFriendActivity extends BaseActivity {
                                             if(task.isSuccessful()){
                                                 fetchFollowers();
                                                 fetchFollowing();
-                                                sendNotification("cancel_request",uId,otherUsersId);
+                                                sendNotification("cancel_request",uId,otherUsersId,followActivityKey);
                                                 Toasty.success(getBaseContext(),"request cancelled").show();
                                             }
                                             else{
@@ -758,7 +880,7 @@ public class FoundFriendActivity extends BaseActivity {
                         fetchFollowers();
                         fetchFollowing();
                         setDefaultButtonText();
-                        sendNotification("cancel_request",uId,otherUsersId);
+                        sendNotification("cancel_request",uId,otherUsersId,followActivityKey);
                         Toasty.success(getBaseContext(),"request cancelled").show();
                     }
                 }else{
@@ -766,7 +888,7 @@ public class FoundFriendActivity extends BaseActivity {
                     fetchFollowers();
                     fetchFollowing();
                     setDefaultButtonText();
-                    sendNotification("cancel_request",uId,otherUsersId);
+                    sendNotification("cancel_request",uId,otherUsersId,followActivityKey);
                     Toasty.success(getBaseContext(),"request cancelled").show();
                 }
             }
@@ -791,7 +913,7 @@ public class FoundFriendActivity extends BaseActivity {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
-                                    sendNotification("follow_locked",uId,otherUsersId);
+                                    sendNotification("follow_locked",uId,otherUsersId,"");
                                     Toasty.success(getBaseContext(),"request sent").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -800,12 +922,12 @@ public class FoundFriendActivity extends BaseActivity {
                         });
                     }else{
                         fetchFollowers();
-                        sendNotification("follow_locked",uId,otherUsersId);
+                        sendNotification("follow_locked",uId,otherUsersId,"");
                         Toasty.success(getBaseContext(),"request sent").show();
                     }
                 }else{
                     fetchFollowers();
-                    sendNotification("follow_locked",uId,otherUsersId);
+                    sendNotification("follow_locked",uId,otherUsersId,"");
                     Toasty.success(getBaseContext(),"request sent").show();
                 }
             }
@@ -832,8 +954,8 @@ public class FoundFriendActivity extends BaseActivity {
                                 if(task.isSuccessful()){
                                     fetchFollowers();
                                     fetchFollowing();
-                                    sendNotification("accept_follow_request",uId,otherUsersId);
-                                    sendNotification("cancel_request",otherUsersId,uId);
+                                    sendNotification("accept_follow_request",uId,otherUsersId,followActivityKey);
+                                   // sendNotification("cancel_request",otherUsersId,uId,followActivityKey);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -852,8 +974,8 @@ public class FoundFriendActivity extends BaseActivity {
                                 if (task.isSuccessful()){
                                     fetchFollowers();
                                     fetchFollowing();
-                                    sendNotification("accept_follow_request",uId,otherUsersId);
-                                    sendNotification("cancel_request",otherUsersId,uId);
+                                    sendNotification("accept_follow_request",uId,otherUsersId,followActivityKey);
+                                   // sendNotification("cancel_request",otherUsersId,uId,followActivityKey);
                                     Toasty.success(getBaseContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getBaseContext(),task.getException().getMessage()).show();
@@ -871,8 +993,8 @@ public class FoundFriendActivity extends BaseActivity {
                             if (task.isSuccessful()){
                                 fetchFollowers();
                                 fetchFollowing();
-                                sendNotification("accept_follow_request",uId,otherUsersId);
-                                sendNotification("cancel_request",otherUsersId,uId);
+                                sendNotification("accept_follow_request",uId,otherUsersId,followActivityKey);
+                                //sendNotification("cancel_request",otherUsersId,uId,followActivityKey);
                                 Toasty.success(getBaseContext(),"request accepted").show();
                             }else{
                                 Toasty.error(getBaseContext(),task.getException().getMessage()).show();

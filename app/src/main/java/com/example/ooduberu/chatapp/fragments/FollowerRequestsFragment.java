@@ -29,6 +29,7 @@ import com.example.ooduberu.chatapp.interfaces.Listener;
 import com.example.ooduberu.chatapp.model.FollowBody;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.DeviceUtils;
+import com.example.ooduberu.chatapp.utility.TimeDateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,6 +40,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +70,8 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
 
     @BindView(R.id.followers_request_recycler_view) RecyclerView followers_request_recycler_view;
     @BindView(R.id.no_requests_layout) FrameLayout no_requests_layout;
+
+    String followActivityKey;
 
     public FollowerRequestsFragment() {
         // Required empty public constructor
@@ -217,7 +224,7 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
             }
         };
 
-        if(adapter != null){
+        if(myActivity != null){
             followers_request_recycler_view.setAdapter(adapter);
             adapter.startListening();
         }
@@ -291,9 +298,33 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
 
     private void acceptRequest(final String otherUsersId){
         listener.showProgressLoader();
+        followersTable.child(AppPreference.getCurrentUserId()).child("pending").child(otherUsersId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         final FollowBody followBody = new FollowBody();
         followBody.setRequest_type("accepted");
-        followBody.setUser_name(AppPreference.getCurrentUserName());
+        followBody.setActivity_id("");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        try {
+            Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+            long timeInMilliseconds = mDate.getTime();
+            //  System.out.println("Date in milli :: " + timeInMilliseconds);
+            followBody.setTime_followed(-timeInMilliseconds);
+            //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         followersTable.child(AppPreference.getCurrentUserId()).child("accepted").child(otherUsersId).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -343,6 +374,20 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
 
     private void cancelRequest(final String otherUsersId){
         listener.showProgressLoader();
+        followersTable.child(AppPreference.getCurrentUserId()).child("pending").child(otherUsersId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         followersTable.child(AppPreference.getCurrentUserId()).child("pending").child(otherUsersId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -382,8 +427,8 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
                                 if(task.isSuccessful()){
 //                                    fetchFollowers();
 //                                    fetchFollowing();
-                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId);
-                                    listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId,followActivityKey);
+                                  //  listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                                     Toasty.success(getContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -402,8 +447,8 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
                                 if (task.isSuccessful()){
 //                                    fetchFollowers();
 //                                    fetchFollowing();
-                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId);
-                                    listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId,followActivityKey);
+                                    //listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                                     Toasty.success(getContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -421,8 +466,8 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
                             if (task.isSuccessful()){
 //                                fetchFollowers();
 //                                fetchFollowing();
-                                listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId);
-                                listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                                listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),otherUsersId,followActivityKey);
+                                //listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                                 Toasty.success(getContext(),"request accepted").show();
                             }else{
                                 Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -457,7 +502,7 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if(task.isSuccessful()){
-                                                listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                                                listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                                                 Toasty.success(getContext(),"request cancelled").show();
                                             }
                                             else{
@@ -472,11 +517,11 @@ public class FollowerRequestsFragment extends android.support.v4.app.Fragment {
                             }
                         });
                     }else{
-                        listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                        listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                         Toasty.success(getContext(),"request cancelled").show();
                     }
                 }else{
-                    listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId());
+                    listener.sendNotification("cancel_request",otherUsersId,AppPreference.getCurrentUserId(),followActivityKey);
                     Toasty.success(getContext(),"request cancelled").show();
                 }
             }

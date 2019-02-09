@@ -146,7 +146,7 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
             @Override
             protected void onBindViewHolder(@NonNull final ActivitiesViewHolder holder, int position, @NonNull final ActivitiesBody model) {
 
-                if(model.getType().equalsIgnoreCase("new follower") || model.getType().equalsIgnoreCase("follower request")){
+                if((model.getType().equalsIgnoreCase("new follower") || model.getType().equalsIgnoreCase("follower request"))|| model.getType().equalsIgnoreCase("accepted request")){
                     holder.post_image.setVisibility(View.GONE);
                     holder.userView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -160,7 +160,7 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
                 }
 
                 holder.setMessage(model.getMessage());
-                if(!model.getTime().isEmpty()){//todo remove later
+                if(!model.getTime().isEmpty()){
                     holder.setTime(TimeDateUtils.getTimeAgo(Long.parseLong(model.getTime())));
                 }
 
@@ -204,7 +204,7 @@ public class UserActivitiesFragment extends android.support.v4.app.Fragment {
             }
         };
 
-        if(adapter != null){
+        if(myActivity != null){
             activity_recycler_view.setAdapter(adapter);
             adapter.startListening();
         }

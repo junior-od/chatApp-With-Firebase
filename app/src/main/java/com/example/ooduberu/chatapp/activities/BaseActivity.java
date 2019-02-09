@@ -43,11 +43,12 @@ public class BaseActivity extends AppCompatActivity implements Listener {
     }
 
     @Override
-    public void sendNotification(String actionType, String user_id, String receiver_id) {
+    public void sendNotification(String actionType, String user_id, String receiver_id, String activity_id) {
         Intent intent = new Intent(this, ChatAppNotificationService.class);
         intent.putExtra("actionType",actionType);
         intent.putExtra("userId",user_id);
         intent.putExtra("receiverId",receiver_id);
+        intent.putExtra("activityId",activity_id);
         startService(intent);
     }
 

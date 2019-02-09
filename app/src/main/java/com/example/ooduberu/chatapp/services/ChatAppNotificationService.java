@@ -36,16 +36,25 @@ public class ChatAppNotificationService extends IntentService {
     private static final String CANCEL_ACCEPT_REQUEST = "cancel_accept_request";
     private static final String CANCEL_FOLLOW_NOTIFICATION = "cancel_follow_notification";
 
+
+
+    DatabaseReference followersTable;
+    DatabaseReference followingTable;
+
     DatabaseReference followNotifications;
     DatabaseReference followRequestNotifications;
     DatabaseReference acceptFollowRequestNotifications;
 
     DatabaseReference activities;
+    DatabaseReference activitiesTemp;
+    DatabaseReference activitiesTemp2;
+
 
 
     String action_type;
     String user_id;
     String receiver_id;
+    String activity_id;
 
     public ChatAppNotificationService() {
         super("ChatAppNotificationService");
@@ -56,6 +65,7 @@ public class ChatAppNotificationService extends IntentService {
         action_type = intent.getExtras().getString("actionType");
         user_id = intent.getExtras().getString("userId");
         receiver_id = intent.getExtras().getString("receiverId");
+        activity_id = intent.getExtras().getString("activityId");
 
         switch (action_type){
             case FOLLOW_UNLOCKED:
@@ -67,19 +77,19 @@ public class ChatAppNotificationService extends IntentService {
                 break;
 
             case ACCEPT_FOLLOW:
-                acceptFollowRequest(user_id,receiver_id);
+                acceptFollowRequest(user_id,receiver_id,activity_id);
                 break;
 
             case CANCEL_REQUEST:
-                cancelFollowRequest(user_id,receiver_id);
+                cancelFollowRequest(user_id,receiver_id,activity_id);
                 break;
 
             case CANCEL_ACCEPT_REQUEST:
-                removeAcceptRequest(user_id,receiver_id);
+                removeAcceptRequest(user_id,receiver_id,activity_id);
                 break;
 
             case CANCEL_FOLLOW_NOTIFICATION:
-                cancelFollowNotification(user_id,receiver_id);
+                cancelFollowNotification(user_id,receiver_id,activity_id);
                 break;
 
         }
@@ -87,7 +97,9 @@ public class ChatAppNotificationService extends IntentService {
     }
 
     private void followUnlockedAccount(final String user_id, final String receiver_id){
-        activities = FirebaseDatabase.getInstance().getReference().child("activities");
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        activities = FirebaseDatabase.getInstance().getReference().child("activities").child(receiver_id).push();
         followNotifications = FirebaseDatabase.getInstance().getReference().child("followNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
@@ -117,11 +129,24 @@ public class ChatAppNotificationService extends IntentService {
                     }
 
                     activitiesBody.setMessage("started following you");
-                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                    final String activityKey = activities.getKey();
+                    activities.setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
-                                Log.i(TAG,"sent sucessfully");
+                                followersTable.child(receiver_id).child("accepted").child(user_id).child("activity_id").setValue(activityKey).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            Log.i(TAG,"sent sucessfully");
+                                        }else{
+                                            Log.i(TAG,task.getException().getMessage());
+                                        }
+                                    }
+                                });
+
+
                             }else{
                                 Log.i(TAG,task.getException().getMessage());
                             }
@@ -137,7 +162,9 @@ public class ChatAppNotificationService extends IntentService {
     }
 
     private void followLockedAccount(final String user_id, final String receiver_id){
-        activities = FirebaseDatabase.getInstance().getReference().child("activities");
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        activities = FirebaseDatabase.getInstance().getReference().child("activities").child(receiver_id).push();
         followRequestNotifications = FirebaseDatabase.getInstance().getReference().child("followRequestNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
@@ -162,11 +189,22 @@ public class ChatAppNotificationService extends IntentService {
                         e.printStackTrace();
                     }
                     activitiesBody.setMessage("requested to follow you");
-                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    final String activityKey = activities.getKey();
+                    activities.setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
-                                Log.i(TAG,"sent sucessful");
+                                followersTable.child(receiver_id).child("pending").child(user_id).child("activity_id").setValue(activityKey).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            Log.i(TAG,"sent sucessful");
+
+                                        }else{
+                                            Log.i(TAG,task.getException().getMessage());
+                                        }
+                                    }
+                                });
                             }else{
                                 Log.i(TAG,task.getException().getMessage());
                             }
@@ -182,19 +220,23 @@ public class ChatAppNotificationService extends IntentService {
         });
     }
 
-    private void acceptFollowRequest(final String user_id, final String receiver_id){
-        activities = FirebaseDatabase.getInstance().getReference().child("activities");
+    private void acceptFollowRequest(final String user_id, final String receiver_id, String activity_id){
+        cancelFollowRequest(receiver_id,user_id,activity_id);
+        followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
+        followingTable = FirebaseDatabase.getInstance().getReference().child("following");
+        activities = FirebaseDatabase.getInstance().getReference().child("activities").child(user_id).push();
         acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
         FollowNotificationBody fnb = new FollowNotificationBody();
         fnb.setFrom(user_id);
         fnb.setMessage("accepted request");
+        fnb.setActivity_id(acceptFollowActivity(user_id,receiver_id));
         acceptFollowRequestNotifications.child(receiver_id).child(user_id).push().setValue(fnb).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 
                 if (task.isSuccessful()){
                     ActivitiesBody activitiesBody = new ActivitiesBody();
-                    activitiesBody.setUser_id(user_id);
+                    activitiesBody.setUser_id(receiver_id);
                     activitiesBody.setType("new follower");
                     activitiesBody.setPost_id("");
                     SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
@@ -208,12 +250,24 @@ public class ChatAppNotificationService extends IntentService {
                         e.printStackTrace();
                     }
                     activitiesBody.setMessage("started following you");
+                    final String activityKey = activities.getKey();
 
-                    activities.child(receiver_id).push().setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    activities.setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
-                                Log.i(TAG,"sent message sucessful");
+                               // Log.i(TAG,"sent message sucessful");
+                                followersTable.child(user_id).child("accepted").child(receiver_id).child("activity_id").setValue(activityKey).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+
+                                            Log.i(TAG,"sent sucessfully");
+                                        }else{
+                                            Log.i(TAG,task.getException().getMessage());
+                                        }
+                                    }
+                                });
                             }else{
                                 Log.i(TAG,task.getException().getMessage());
                             }
@@ -231,13 +285,58 @@ public class ChatAppNotificationService extends IntentService {
 
     }
 
-    private void cancelFollowRequest(String user_id,String receiver_id){
+    private String acceptFollowActivity(final String user_id, final  String receiver_id){
+        activitiesTemp2 = FirebaseDatabase.getInstance().getReference().child("activities").child(receiver_id).push();
+        ActivitiesBody activitiesBody = new ActivitiesBody();
+        activitiesBody.setUser_id(user_id);
+        activitiesBody.setType("accepted request");
+        activitiesBody.setPost_id("");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        try {
+            Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+            long timeInMilliseconds = mDate.getTime();
+            //  System.out.println("Date in milli :: " + timeInMilliseconds);
+            activitiesBody.setTime(""+timeInMilliseconds);
+            //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        activitiesBody.setMessage("accepted your follow request");
+        final String activityKey = activitiesTemp2.getKey();
+        activitiesTemp2.setValue(activitiesBody).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i(TAG,"done done done");
+                    //return activityKey
+
+                }else{
+                    Log.i(TAG,task.getException().getMessage());
+
+                }
+            }
+        });
+        return activityKey;
+    }
+
+    private void cancelFollowRequest(String user_id, final String receiver_id, final String activity_id){
+        activitiesTemp = FirebaseDatabase.getInstance().getReference().child("activities");
         followRequestNotifications = FirebaseDatabase.getInstance().getReference().child("followRequestNotification");
         followRequestNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Log.i(TAG,"canceled request notification sucessfully");
+                    activitiesTemp.child(receiver_id).child(activity_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"canceled request notification sucessfully");
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+
+                            }
+                        }
+                    });
                 }else{
                     Log.i(TAG,task.getException().getMessage());
                 }
@@ -245,13 +344,26 @@ public class ChatAppNotificationService extends IntentService {
         });
     }
 
-    private void removeAcceptRequest(String user_id, String receiver_id){
+    private void removeAcceptRequest(String user_id, final String receiver_id, final String activity_id){
+        Log.i(TAG,activity_id);
+        activitiesTemp2 = FirebaseDatabase.getInstance().getReference().child("activities");
         acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
         acceptFollowRequestNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Log.i(TAG,"cancel accept request sucessfully");
+                    activitiesTemp2.child(receiver_id).child(activity_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"cancel accept request sucessfully");
+
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+
+                            }
+                        }
+                    });
                 }else{
                     Log.i(TAG,task.getException().getMessage());
                 }
@@ -260,13 +372,25 @@ public class ChatAppNotificationService extends IntentService {
 
     }
 
-    private void cancelFollowNotification(String user_id,String receiver_id){
+    private void cancelFollowNotification(String user_id, final String receiver_id, final String activity_id){
+        activities = FirebaseDatabase.getInstance().getReference().child("activities");
         followNotifications = FirebaseDatabase.getInstance().getReference().child("followNotification");
         followNotifications.child(receiver_id).child(user_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Log.i(TAG,"cancel follow notification sucessfully");
+                    activities.child(receiver_id).child(activity_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Log.i(TAG,"cancel follow notification sucessfully");
+
+                            }else{
+                                Log.i(TAG,task.getException().getMessage());
+
+                            }
+                        }
+                    });
                 }else{
                     Log.i(TAG,task.getException().getMessage());
                 }

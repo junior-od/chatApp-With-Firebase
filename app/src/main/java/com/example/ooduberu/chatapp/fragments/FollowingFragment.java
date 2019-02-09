@@ -28,6 +28,7 @@ import com.example.ooduberu.chatapp.model.FollowBody;
 import com.example.ooduberu.chatapp.utility.AppPreference;
 import com.example.ooduberu.chatapp.utility.DeviceUtils;
 import com.example.ooduberu.chatapp.utility.NetworkUtils;
+import com.example.ooduberu.chatapp.utility.TimeDateUtils;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,7 +40,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,6 +63,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
     DatabaseReference followersTable;
     DatabaseReference  followingTableTemp;
     DatabaseReference followingTable;
+    DatabaseReference acceptFollowRequestNotifications;
+
 
     Query query;
     FirebaseRecyclerOptions<FollowBody> options;
@@ -75,6 +81,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
     ArrayList<String> followbackKeys = new ArrayList<>();
 
     String foundUserId;
+    String followActivityKey;
+    String removeAcceptActivityKey;
 
 
     public FollowingFragment() {
@@ -126,6 +134,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
         followersTable = FirebaseDatabase.getInstance().getReference().child("followers");
         followingTable = FirebaseDatabase.getInstance().getReference().child("following");
         followingTableTemp = FirebaseDatabase.getInstance().getReference().child("following").child(foundUserId).child("accepted");
+        acceptFollowRequestNotifications = FirebaseDatabase.getInstance().getReference().child("acceptRequestNotification");
 
         refreshList();
 
@@ -215,9 +224,9 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                     if (dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("accepted")){
                                         followingKeys.add(theFollowerId);
                                     }
-//                                    else if (dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
-//                                        acceptRequestKeys.add(theFollowerId);
-//                                    }
+                                    else if (dataSnapshot.child("accepted").child(AppPreference.getCurrentUserId()).child("request_type").getValue().toString().equalsIgnoreCase("accept request")){
+                                        acceptRequestKeys.add(theFollowerId);
+                                    }
                                 }
                             }
 
@@ -271,7 +280,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
     private void findUser(String s){
         if(TextUtils.isEmpty(s)){
             //fetch all followers
-            query = userTable.orderByChild("user_name");
+            query =  followingTableTemp.orderByChild("time_followed");
             //todo query according to the time thr person followed the user
         }else{
             //fetch for currently searched follower
@@ -384,7 +393,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
 
             }
         };
-        if(adapter != null){
+        if(myActivity != null){
             adapter.startListening();
             display_users_recycler_view.setAdapter(adapter);
         }
@@ -411,7 +420,17 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
-            followBody.setUser_name(AppPreference.getCurrentUserName());
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             followersTable.child(id).child("accepted").child(AppPreference.getCurrentUserId()).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -435,7 +454,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                                         adapter.notifyItemChanged(position);
                                                     }
                                                 },2000);
-                                                listener.sendNotification("follow_unlocked",AppPreference.getCurrentUserId(),id);
+                                                listener.sendNotification("follow_unlocked",AppPreference.getCurrentUserId(),id,"");
 
                                             }else{
                                                 Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -478,7 +497,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                         }
                                     },2000);
                                     Toasty.success(getContext(),"request sent").show();
-                                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id);
+                                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id,"");
                                 }
                                 else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -502,7 +521,18 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
         if(accountType.equalsIgnoreCase("unlocked")){
             final FollowBody followBody = new FollowBody();
             followBody.setRequest_type("accepted");
-            followBody.setUser_name(AppPreference.getCurrentUserName());
+            followBody.setActivity_id("");
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+            try {
+                Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+                long timeInMilliseconds = mDate.getTime();
+                //  System.out.println("Date in milli :: " + timeInMilliseconds);
+                followBody.setTime_followed(-timeInMilliseconds);
+                //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
             followersTable.child(id).child("accepted").child(AppPreference.getCurrentUserId()).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -524,7 +554,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                                     }
                                                 },2000);
                                                 Toasty.success(getContext(),"now following").show();
-                                                listener.sendNotification("follow_unlocked",AppPreference.getCurrentUserId(),id);
+                                                listener.sendNotification("follow_unlocked",AppPreference.getCurrentUserId(),id,"");
                                             }else{
                                                 Toasty.error(getContext(),task.getException().getMessage()).show();
                                             }
@@ -588,9 +618,33 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
 
     private void acceptRequest(final String id , final int position){
         listener.showProgressLoader();
+        followersTable.child(AppPreference.getCurrentUserId()).child("pending").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         final FollowBody followBody = new FollowBody();
         followBody.setRequest_type("accepted");
-        followBody.setUser_name(AppPreference.getCurrentUserName());
+        followBody.setActivity_id("");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        try {
+            Date mDate = sdf.parse(TimeDateUtils.getCurrentGMTTimestamp());
+            long timeInMilliseconds = mDate.getTime();
+            //  System.out.println("Date in milli :: " + timeInMilliseconds);
+            followBody.setTime_followed(-timeInMilliseconds);
+            //Toasty.error(getContext(), TimeDateUtils.getTimeAgo(timeInMilliseconds)+"").show();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         followersTable.child(AppPreference.getCurrentUserId()).child("accepted").child(id).setValue(followBody).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -640,6 +694,20 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
 
     private void cancelRequest(final String id, final int position){
         listener.showProgressLoader();
+        followersTable.child(id).child("pending").child(AppPreference.getCurrentUserId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("activity_id").exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         followersTable.child(id).child("pending").child(AppPreference.getCurrentUserId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -665,6 +733,34 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
 
     private void unfollow(final String id, final int position){
         listener.showProgressLoader();
+        acceptFollowRequestNotifications.child(AppPreference.getCurrentUserId()).child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    removeAcceptActivityKey = ds.child("activity_id").getValue().toString();
+                    return;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        followersTable.child(id).child("accepted").child(AppPreference.getCurrentUserId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    followActivityKey = dataSnapshot.child("activity_id").getValue().toString();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         followersTable.child(id).child("accepted").child(AppPreference.getCurrentUserId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -710,8 +806,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                     }
                                 },2000);
 
-                                listener.sendNotification("cancel_accept_request",id,AppPreference.getCurrentUserId());
-                                listener.sendNotification("cancel_follow_notification",AppPreference.getCurrentUserId(),id);
+                                listener.sendNotification("cancel_accept_request",id,AppPreference.getCurrentUserId(),removeAcceptActivityKey);
+                                listener.sendNotification("cancel_follow_notification",AppPreference.getCurrentUserId(),id,followActivityKey);
                                 Toasty.success(getContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -733,8 +829,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                     }
                                 },2000);
 
-                                listener.sendNotification("cancel_accept_request",id,AppPreference.getCurrentUserId());
-                                listener.sendNotification("cancel_follow_notification",AppPreference.getCurrentUserId(),id);
+                                listener.sendNotification("cancel_accept_request",id,AppPreference.getCurrentUserId(),removeAcceptActivityKey);
+                                listener.sendNotification("cancel_follow_notification",AppPreference.getCurrentUserId(),id,followActivityKey);
                                 Toasty.success(getContext(),"unfollowed").show();
                             }else{
                                 Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -778,7 +874,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                                         adapter.notifyItemChanged(position);
                                                     }
                                                 },2000);
-                                                listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id);
+                                                listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id,followActivityKey);
                                                 Toasty.success(getContext(),"request cancelled").show();
                                             }
                                             else{
@@ -801,7 +897,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                             }
                         },2000);
 
-                        listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id);
+                        listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id,followActivityKey);
                         Toasty.success(getContext(),"request cancelled").show();
                     }
                 }else{
@@ -813,7 +909,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                         }
                     },2000);
 
-                    listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id);
+                    listener.sendNotification("cancel_request",AppPreference.getCurrentUserId(),id,followActivityKey);
                     Toasty.success(getContext(),"request cancelled").show();
                 }
             }
@@ -846,7 +942,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                     },2000);
 
 
-                                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id);
+                                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id,"");
                                     Toasty.success(getContext(),"request sent").show();
                                 }else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -861,7 +957,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                 adapter.notifyItemChanged(position);
                             }
                         },2000);
-                        listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id);
+                        listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id,"");
                         Toasty.success(getContext(),"request sent").show();
                     }
                 }else{
@@ -872,7 +968,7 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                             adapter.notifyItemChanged(position);
                         }
                     },2000);
-                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id);
+                    listener.sendNotification("follow_locked",AppPreference.getCurrentUserId(),id,"");
                     Toasty.success(getContext(),"request sent").show();
                 }
             }
@@ -904,8 +1000,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                             adapter.notifyItemChanged(position);
                                         }
                                     },2000);
-                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id);
-                                    listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId());
+                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id,followActivityKey);
+//                                    listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId(),followActivityKey);
                                     Toasty.success(getContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -929,8 +1025,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                             adapter.notifyItemChanged(position);
                                         }
                                     },2000);
-                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id);
-                                    listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId());
+                                    listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id,followActivityKey);
+//                                    listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId(),followActivityKey);
                                     Toasty.success(getContext(),"request accepted").show();
                                 }else{
                                     Toasty.error(getContext(),task.getException().getMessage()).show();
@@ -953,8 +1049,8 @@ public class FollowingFragment extends android.support.v4.app.Fragment {
                                         adapter.notifyItemChanged(position);
                                     }
                                 },2000);
-                                listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id);
-                                listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId());
+                                listener.sendNotification("accept_follow_request",AppPreference.getCurrentUserId(),id,followActivityKey);
+                               // listener.sendNotification("cancel_request",id,AppPreference.getCurrentUserId(),followActivityKey);
                                 Toasty.success(getContext(),"request accepted").show();
                             }else{
                                 Toasty.error(getContext(),task.getException().getMessage()).show();
